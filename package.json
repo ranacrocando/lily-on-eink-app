@@ -23,8 +23,8 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@lily-on-eink/core": "file:../lily-on-eink/packages/core",
-    "@lily-on-eink/engine-wasm": "file:../lily-on-eink/packages/engine-wasm",
+    "@lily-on-eink/core": "https://github.com/ranacrocando/lily-on-eink/releases/download/v0.1.0/lily-on-eink-core-0.1.0.tgz",
+    "@lily-on-eink/engine-wasm": "https://github.com/ranacrocando/lily-on-eink/releases/download/v0.1.0/lily-on-eink-engine-wasm-0.1.0.tgz",
     "fflate": "0.8.3"
   },
   "overrides": {

@@ -12,16 +12,12 @@ Minimum browsers: Chrome or Edge 116, Firefox 124, Safari 17.4. Older browsers s
 
 ## Development
 
-The app needs the core repository [lily-on-eink](https://github.com/ranacrocando/lily-on-eink) in a sibling folder:
-
 ```sh
-git clone https://github.com/ranacrocando/lily-on-eink.git ../lily-on-eink
-(cd ../lily-on-eink && npm ci && npm run build)
-npm install      # copies the two core packages (.npmrc: install-links=true)
+npm ci
 npm run dev
 ```
 
-After a change in core, rebuild it, delete `node_modules/@lily-on-eink` and run `npm install` again. `core-ref.txt` pins the core commit that CI builds against (secret `CORE_REPO_TOKEN`).
+Developing against a local core: temporarily set the two dependencies to `file:../lily-on-eink/packages/core` and `file:../lily-on-eink/packages/engine-wasm`, run `npm install` and do not commit it.
 
 Other scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
 
