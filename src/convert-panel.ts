@@ -137,7 +137,7 @@ export function initConvertPanel({ engineStatus, project, settings, calibrating 
     convertButton.disabled = running || reason !== '';
     cancelButton.hidden = !running;
     for (const button of results.querySelectorAll<HTMLButtonElement>('button.preview-button'))
-      button.disabled = running || drawing;
+      button.disabled = running || drawing || !engineStatus.isReady();
     hint.textContent = running ? '' : reason;
   }
 
