@@ -69,8 +69,10 @@ describe('preview view', () => {
   if (!device) throw new Error('no device');
   const close = vi.fn();
   let pixels: Uint8ClampedArray;
+  const drawImage = vi.fn();
 
   beforeEach(() => {
+    drawImage.mockReset();
     document.body.innerHTML = `<figure id="preview" hidden><div id="preview-frame"><canvas id="preview-canvas"></canvas></div>
       <button id="preview-close"></button></figure><button id="opener"></button>`;
     pixels = new Uint8ClampedArray([200, 200, 200, 255]);
@@ -80,7 +82,7 @@ describe('preview view', () => {
     );
     const context = {
       fillRect: vi.fn(),
-      drawImage: vi.fn(),
+      drawImage,
       getImageData: vi.fn(() => ({ data: pixels })),
       putImageData: vi.fn(),
     };
@@ -101,8 +103,47 @@ describe('preview view', () => {
     expect(Array.from(pixels)).toEqual([204, 204, 204, 255]);
     expect(canvas.getAttribute('aria-label')).toContain(device.name);
     expect(close).toHaveBeenCalled();
+    expect(drawImage).toHaveBeenCalledWith(
+      expect.anything(),
+      0,
+      0,
+      device.widthPx,
+      device.heightPx,
+      0,
+      0,
+      device.widthPx,
+      device.heightPx,
+    );
+    expect(document.getElementById('preview-frame')?.style.getPropertyValue('--preview-ratio')).toBe(
+      `${String(device.widthPx)} / ${String(device.heightPx)}`,
+    );
     view.clear();
     expect(view.isOpen()).toBe(false);
+    expect([canvas.width, canvas.height]).toEqual([0, 0]);
+  });
+
+  it('resets the canvas and stays closed when drawing fails', async () => {
+    drawImage.mockImplementation(() => {
+      throw new Error('boom');
+    });
+    const view = initPreview();
+    const opener = document.getElementById('opener') as HTMLButtonElement;
+    await expect(view.show(new Uint8Array([1]), device, opener)).rejects.toThrow('boom');
+    const canvas = document.getElementById('preview-canvas') as HTMLCanvasElement;
+    expect([canvas.width, canvas.height]).toEqual([0, 0]);
+    expect(view.isOpen()).toBe(false);
+  });
+
+  it('ignores Escape when it was handled elsewhere', async () => {
+    const view = initPreview();
+    await view.show(new Uint8Array([1]), device, document.getElementById('opener') as HTMLButtonElement);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+    expect(view.isOpen()).toBe(false);
+    await view.show(new Uint8Array([1]), device, document.getElementById('opener') as HTMLButtonElement);
+    const handled = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    handled.preventDefault();
+    document.dispatchEvent(handled);
+    expect(view.isOpen()).toBe(true);
   });
 
   it('closes with Escape or the button and returns the focus to the opener', async () => {

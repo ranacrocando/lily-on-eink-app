@@ -70,6 +70,7 @@ export function renderResults(
         const preview = downloadButton('Preview', `Preview the first page of ${file.name}`, () => {
           onPreview(file.mainFile, file.bookIndex, preview);
         });
+        preview.classList.add('preview-button');
         li.append(preview);
       }
       ul.append(li);
@@ -131,6 +132,8 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): Co
     else if (!settings.current()) reason = 'Check the screen size of your e-reader.';
     convertButton.disabled = running || reason !== '';
     cancelButton.hidden = !running;
+    for (const button of results.querySelectorAll<HTMLButtonElement>('button.preview-button'))
+      button.disabled = running;
     hint.textContent = running ? '' : reason;
   }
 
@@ -149,6 +152,7 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): Co
     onOutcome: (outcome: RunOutcome) => void | Promise<void>,
     focusAfter: () => HTMLElement,
   ): Promise<void> {
+    if (controller !== undefined) return;
     controller = new AbortController();
     const { signal } = controller;
     preview.clear();
@@ -241,7 +245,8 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): Co
         }
         const png = firstPagePng(outcome.result, mainFile, bookIndex);
         if (!png) {
-          progress.textContent = 'The preview could not be created.';
+          const errors = outcome.result.diagnostics.filter((d) => d.severity === 'error').map(diagnosticText);
+          progress.textContent = ['The preview could not be created.', ...errors].join(' ');
           return;
         }
         try {

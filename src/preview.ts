@@ -76,6 +76,10 @@ export function initPreview(): PreviewView {
       const image = context.getImageData(0, 0, width, height);
       quantize16(image.data);
       context.putImageData(image, 0, 0);
+    } catch (error) {
+      canvas.width = 0;
+      canvas.height = 0;
+      throw error;
     } finally {
       bitmap.close();
     }
@@ -86,8 +90,9 @@ export function initPreview(): PreviewView {
   }
 
   closeButton.addEventListener('click', close);
+  // A global listener is a conscious choice: the app has exactly one preview, and it only acts while that is open.
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !figure.hidden) close();
+    if (event.key === 'Escape' && !event.defaultPrevented && !figure.hidden) close();
   });
   clear();
   return { show, clear, isOpen: () => !figure.hidden, closeButton };
