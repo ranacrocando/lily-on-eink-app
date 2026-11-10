@@ -45,6 +45,8 @@ test('the about page links to licence files that exist', async ({ page, request 
   await expect(links.first()).toBeVisible();
   const hrefs = await links.evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).href));
   expect(hrefs.length).toBeGreaterThan(0);
+  // Test builds have no VITE_APP_VERSION, so the corresponding source points to the releases page.
+  await expect(page.locator('#source-links a')).toHaveAttribute('href', /\/lily-on-eink-app\/releases$/);
   const appLicense = await page.locator('#app-license').evaluate((a) => (a as HTMLAnchorElement).href);
   for (const href of [appLicense, ...hrefs]) {
     if (!href.startsWith('http://localhost')) continue;
