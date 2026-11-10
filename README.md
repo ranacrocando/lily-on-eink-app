@@ -15,7 +15,7 @@ Minimum browsers: Chrome or Edge 116, Firefox 124, Safari 17.4. Older browsers s
 The app needs the core repository `lily-on-eink` in a sibling folder:
 
 ```sh
-git clone <lily-on-eink> ../lily-on-eink
+git clone https://github.com/ranacrocando/lily-on-eink.git ../lily-on-eink
 (cd ../lily-on-eink && npm ci && npm run build)
 npm install      # copies the two core packages (.npmrc: install-links=true)
 npm run dev
