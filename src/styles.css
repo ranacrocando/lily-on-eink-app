@@ -97,3 +97,41 @@ input[type='number'] {
 #custom-error:empty {
   display: none;
 }
+.primary {
+  background: Highlight;
+  color: HighlightText;
+  border-color: Highlight;
+  font-weight: 600;
+}
+.results {
+  list-style: none;
+  padding: 0;
+}
+.results li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid color-mix(in srgb, currentcolor 25%, Canvas);
+}
+.file-name {
+  overflow-wrap: anywhere;
+}
+.diagnostics {
+  padding-left: 1.25rem;
+}
+.diagnostics .error {
+  color: #c0392b;
+}
+.diagnostics .warning {
+  border: 0;
+  padding-left: 0;
+}
+pre {
+  overflow-x: auto;
+  padding: 0.75rem;
+  background: color-mix(in srgb, currentcolor 8%, Canvas);
+  font-size: 0.85rem;
+}

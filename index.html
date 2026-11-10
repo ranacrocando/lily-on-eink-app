@@ -61,6 +61,16 @@
         </div>
         <p id="page-size" aria-live="polite"></p>
       </section>
+      <section aria-labelledby="convert-heading">
+        <h2 id="convert-heading">3. Convert</h2>
+        <div class="buttons">
+          <button id="convert" type="button" class="primary" aria-describedby="convert-hint" disabled>Convert</button>
+          <button id="cancel" type="button" hidden>Cancel</button>
+        </div>
+        <p id="convert-hint"></p>
+        <p id="progress-text" role="status" aria-live="polite"></p>
+        <div id="results"></div>
+      </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
