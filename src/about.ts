@@ -12,6 +12,7 @@ async function init(): Promise<void> {
     const response = await fetch(`${base}index.json`);
     if (!response.ok) throw new Error(`HTTP ${String(response.status)}`);
     const index = parseIndex(await response.json());
+    byId('app-license', HTMLAnchorElement).href = `${base}${encodeURIComponent(index.appLicense)}`;
     info.textContent = engineText(index);
     renderLicenseList(list, index, base);
   } catch (e) {

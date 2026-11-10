@@ -5,6 +5,8 @@ export interface LicenseEntry {
 }
 
 export interface LicenseIndex {
+  /** File name of the app's own licence in the licenses folder. */
+  appLicense: string;
   engine: { package: string; version: string; lilypond: string };
   files: LicenseEntry[];
 }
@@ -15,13 +17,18 @@ export function parseIndex(data: unknown): LicenseIndex {
   if (typeof data !== 'object' || data === null) throw bad();
   const { engine, files } = data as { engine?: Record<string, unknown>; files?: unknown };
   if (!engine || typeof engine.package !== 'string' || typeof engine.version !== 'string') throw bad();
+  if (typeof (data as { appLicense?: unknown }).appLicense !== 'string') throw bad();
   if (typeof engine.lilypond !== 'string' || !Array.isArray(files)) throw bad();
   const entries = (files as unknown[]).map((f) => {
     const e = f as Partial<LicenseEntry> | null;
     if (typeof e?.file !== 'string' || typeof e.package !== 'string' || typeof e.license !== 'string') throw bad();
     return { file: e.file, package: e.package, license: e.license };
   });
-  return { engine: { package: engine.package, version: engine.version, lilypond: engine.lilypond }, files: entries };
+  return {
+    appLicense: (data as { appLicense: string }).appLicense,
+    engine: { package: engine.package, version: engine.version, lilypond: engine.lilypond },
+    files: entries,
+  };
 }
 
 /** "LilyPond 2.26 via @sightread/lilypond-wasm 0.2.0" */

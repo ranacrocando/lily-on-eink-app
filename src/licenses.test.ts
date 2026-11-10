@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { engineText, parseIndex, renderLicenseList } from './licenses';
 
 const index = {
+  appLicense: 'app-LICENSE',
   engine: { package: '@sightread/lilypond-wasm', version: '0.2.0', lilypond: '2.26' },
   files: [{ file: 'fflate-LICENSE', package: 'fflate', license: 'MIT' }],
 };

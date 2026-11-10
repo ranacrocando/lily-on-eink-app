@@ -4,7 +4,10 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const ENGINE_PACKAGE = '@sightread/lilypond-wasm';
-/** The LilyPond release inside the engine package (the package version is not the LilyPond version). */
+/**
+ * The LilyPond release inside the engine package. The package version is not the LilyPond version, so this
+ * constant must be updated together with every bump of @sightread/lilypond-wasm.
+ */
 const LILYPOND_VERSION = '2.26';
 const LICENSE_NAMES = ['LICENSE', 'LICENSE.md', 'LICENSE.txt', 'COPYING', 'COPYING.md', 'COPYING.txt'];
 
@@ -30,19 +33,31 @@ export function outputName(packageName, file) {
 }
 
 /**
- * The packages whose licence files are shipped: every runtime dependency plus the engine package, without duplicates.
+ * The packages whose licence files are shipped: every runtime dependency, their runtime dependencies (recursively)
+ * and the engine package, without duplicates. `readDependencies` returns the `dependencies` of an installed package.
  * @param {Record<string, string> | undefined} dependencies
+ * @param {(name: string) => Record<string, string> | undefined} [readDependencies]
  */
-export function packagesToCopy(dependencies) {
-  return [...new Set([...Object.keys(dependencies ?? {}), ENGINE_PACKAGE])];
+export function packagesToCopy(dependencies, readDependencies = () => undefined) {
+  /** @type {Set<string>} */
+  const seen = new Set();
+  const queue = [...Object.keys(dependencies ?? {}), ENGINE_PACKAGE];
+  for (let name = queue.shift(); name !== undefined; name = queue.shift()) {
+    if (seen.has(name)) continue;
+    seen.add(name);
+    queue.push(...Object.keys(readDependencies(name) ?? {}));
+  }
+  return [...seen];
 }
 
 /**
  * @param {{ file: string, package: string, license: string }[]} files
  * @param {string} engineVersion
+ * @param {string} appLicense file name of the app's own licence
  */
-export function buildIndex(files, engineVersion) {
+export function buildIndex(files, engineVersion, appLicense) {
   return {
+    appLicense,
     engine: { package: ENGINE_PACKAGE, version: engineVersion, lilypond: LILYPOND_VERSION },
     files: [...files].sort((a, b) => a.package.localeCompare(b.package) || a.file.localeCompare(b.file)),
   };
@@ -69,15 +84,34 @@ export function copyLicenses(root) {
   const files = [];
   let engineVersion = '';
 
-  for (const name of packagesToCopy(own.dependencies)) {
+  /** @param {string} name */
+  const readPackage = (name) => {
+    const file = join(modules, ...name.split('/'), 'package.json');
+    if (!existsSync(file)) throw new Error(`${name} is not installed in node_modules`);
+    return JSON.parse(readFileSync(file, 'utf8'));
+  };
+  const taken = new Set();
+  /** @param {string} target */
+  const claim = (target) => {
+    if (taken.has(target.toLowerCase())) throw new Error(`two licence files would be copied to ${target}`);
+    taken.add(target.toLowerCase());
+  };
+
+  const ownLicense = pickLicenseFile(readdirSync(root));
+  if (!ownLicense) throw new Error('the app has no LICENSE file');
+  const appFile = outputName(String(own.name), ownLicense);
+  claim(appFile);
+  copyFileSync(join(root, ownLicense), join(out, appFile));
+
+  for (const name of packagesToCopy(own.dependencies, (n) => readPackage(n).dependencies)) {
     const dir = join(modules, ...name.split('/'));
-    if (!existsSync(join(dir, 'package.json'))) throw new Error(`${name} is not installed in node_modules`);
-    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+    const pkg = readPackage(name);
     const license = licenseOf(name, pkg);
     if (name === ENGINE_PACKAGE) engineVersion = String(pkg.version);
     const licenseFile = pickLicenseFile(readdirSync(dir));
     if (!licenseFile) throw new Error(`${name} has no LICENSE, LICENSE.md or COPYING file`);
     const target = outputName(name, licenseFile);
+    claim(target);
     copyFileSync(join(dir, licenseFile), join(out, target));
     files.push({ file: target, package: name, license });
 
@@ -85,12 +119,13 @@ export function copyLicenses(root) {
       const extra = join(dir, 'licenses');
       if (!existsSync(extra)) throw new Error(`${name} has no licenses folder`);
       for (const f of readdirSync(extra)) {
+        claim(f);
         copyFileSync(join(extra, f), join(out, f));
         files.push({ file: f, package: name, license });
       }
     }
   }
-  writeFileSync(join(out, 'index.json'), `${JSON.stringify(buildIndex(files, engineVersion), null, 2)}\n`);
+  writeFileSync(join(out, 'index.json'), `${JSON.stringify(buildIndex(files, engineVersion, appFile), null, 2)}\n`);
   return files.length;
 }
 
