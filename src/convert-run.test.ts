@@ -120,3 +120,15 @@ describe('runConversion', () => {
     );
   });
 });
+
+describe('runConversion outputs', () => {
+  it('asks the engine for PNG when requested', async () => {
+    const engine = engineWith(() => Promise.resolve({ ok: true, exitCode: 0, files: { 'score.png': pdf }, log: '' }));
+    const outcome = await runConversion(
+      { files, settings, mainFiles: ['a.ly'], outputs: ['png'], signal: new AbortController().signal },
+      engine,
+    );
+    expect(outcome.result.outputs[0]?.pngPages).toHaveLength(1);
+    expect(outcome.result.outputs[0]?.pdf).toBeUndefined();
+  });
+});

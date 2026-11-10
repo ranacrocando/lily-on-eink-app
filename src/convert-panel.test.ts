@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import type { ConvertResult } from '@lily-on-eink/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { diagnosticText, renderResults } from './convert-panel';
 
 const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
@@ -37,6 +37,21 @@ describe('renderResults', () => {
       'Download',
       'Download all (ZIP)',
     ]);
+  });
+
+  it('adds a Preview button per PDF that reports file and book', () => {
+    const container = document.createElement('div');
+    const onPreview = vi.fn();
+    const result = { outputs: [{ ...output('a.ly', 'Song.pdf'), bookIndex: 1 }], diagnostics: [], logs: {} };
+    renderResults(container, result, ['a.ly'], 'all.zip', onPreview);
+    const button = Array.from(container.querySelectorAll('button')).find((b) => b.textContent === 'Preview');
+    button?.click();
+    expect(onPreview).toHaveBeenCalledWith('a.ly', 1, button);
+  });
+
+  it('has no Preview button without a handler', () => {
+    const c = render({ outputs: [output('a.ly', 'Song.pdf')], diagnostics: [], logs: {} }, ['a.ly']);
+    expect(c.textContent).not.toContain('Preview');
   });
 
   it('has no ZIP button for one PDF', () => {

@@ -94,6 +94,13 @@
         <p id="convert-hint"></p>
         <p id="progress-text" role="status" aria-live="polite" tabindex="-1"></p>
         <div id="results"></div>
+        <figure id="preview" class="preview" hidden>
+          <div id="preview-frame" class="preview-frame">
+            <canvas id="preview-canvas" role="img" aria-label="Preview of page 1"></canvas>
+          </div>
+          <figcaption>Approximate e-ink look of page 1 (16 grey levels)</figcaption>
+          <button id="preview-close" type="button">Close preview</button>
+        </figure>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
