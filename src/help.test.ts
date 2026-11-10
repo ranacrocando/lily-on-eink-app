@@ -19,10 +19,14 @@ describe('transferHelp', () => {
     const text = transferHelp('kindle-scribe').steps.join(' ');
     expect(text).toContain('"documents" folder');
     expect(text).toContain('Send to Kindle');
+    expect(text).toContain("don't choose the option to convert");
+    expect(text).toContain('library');
   });
   it('mentions the e-mail route for PocketBook and the web interface for reMarkable', () => {
     expect(transferHelp('pocketbook-era').steps.join(' ')).toContain('Send-to-PocketBook');
     expect(transferHelp('remarkable-2').steps.join(' ')).toContain('USB web interface');
+    expect(transferHelp('remarkable-2').steps.join(' ')).toContain('http://10.11.99.1');
+    expect(transferHelp('boox-note-air3').steps.join(' ')).toContain('File transfer');
   });
 });
 

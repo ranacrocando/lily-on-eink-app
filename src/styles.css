@@ -136,8 +136,9 @@ pre {
   font-size: 0.85rem;
 }
 .site-footer {
-  margin-top: 3rem;
-  padding-top: 1rem;
+  max-width: 40rem;
+  margin: 3rem auto 0;
+  padding: 1rem;
   border-top: 1px solid color-mix(in srgb, currentcolor 25%, Canvas);
   font-size: 0.85rem;
   color: color-mix(in srgb, currentcolor 75%, Canvas);
@@ -147,4 +148,12 @@ pre {
 }
 .site-footer a {
   color: inherit;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
 }

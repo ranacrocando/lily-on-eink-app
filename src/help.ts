@@ -7,7 +7,9 @@ export interface TransferHelp {
 
 const USB_STEPS = [
   'Connect the e-reader to your computer with a USB cable.',
+  'On Android-based readers like Boox, pull down the notification and choose "File transfer" if the computer does not see the reader.',
   'Copy the PDF onto the e-reader. It appears as a drive or a folder.',
+  "Then find the PDF in the reader's Library or Storage.",
   'Eject the e-reader on your computer, then unplug the cable.',
 ];
 
@@ -19,7 +21,7 @@ const FAMILIES: { prefix: string; help: TransferHelp }[] = [
       steps: [
         'Connect your Kobo to your computer with a USB cable and tap "Connect" on the reader if it asks.',
         'The Kobo appears as a drive. Copy the PDF onto it. Any folder is fine.',
-        'Eject the drive on your computer, then unplug the cable. The PDF shows up in your library after a moment.',
+        'Eject the drive on your computer, then unplug the cable. It can take a minute until the PDF appears in your library.',
       ],
     },
   },
@@ -30,8 +32,8 @@ const FAMILIES: { prefix: string; help: TransferHelp }[] = [
       steps: [
         'Connect your Kindle to your computer with a USB cable.',
         'Open the Kindle drive and copy the PDF into its "documents" folder.',
-        'Eject the drive, then unplug the cable.',
-        'Please do not use "Send to Kindle" for these PDFs: it converts them and often ruins the layout. The USB cable keeps every page exactly as it is.',
+        'Eject the drive, then unplug the cable. The PDF appears in your library.',
+        "USB is the most reliable. If you use Send to Kindle, send the PDF as it is and don't choose the option to convert it.",
       ],
     },
   },
@@ -41,7 +43,7 @@ const FAMILIES: { prefix: string; help: TransferHelp }[] = [
       family: 'PocketBook',
       steps: [
         'With a USB cable: connect the PocketBook to your computer and copy the PDF onto the drive that appears. Then eject it.',
-        'Without a cable: email the PDF to your personal Send-to-PocketBook address. It arrives on the reader when the reader is online.',
+        'Without a cable: email the PDF to your personal Send-to-PocketBook address. This needs to be set up first in your PocketBook account. The PDF arrives on the reader when the reader is online.',
       ],
     },
   },
@@ -51,7 +53,7 @@ const FAMILIES: { prefix: string; help: TransferHelp }[] = [
       family: 'reMarkable',
       steps: [
         'Easiest: open the reMarkable app on your computer or phone and add the PDF there. It syncs to your tablet.',
-        'Or use a USB cable: switch on the "USB web interface" in the storage settings of the tablet, open the address it shows in your browser and drop the PDF there.',
+        'Or use a USB cable: connect the tablet, enable the "USB web interface" under Settings > Storage, then open http://10.11.99.1 in your browser and drop the PDF there. (Older software may differ.)',
       ],
     },
   },
