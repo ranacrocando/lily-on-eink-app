@@ -12,6 +12,8 @@ interface Parts {
   engineStatus: EngineStatus;
   project: ProjectPanel;
   settings: SettingsPanel;
+  /** True while the calibration page is being drawn: the engine is busy and Convert and Preview must wait. */
+  calibrating?: () => boolean;
 }
 
 function element<K extends keyof HTMLElementTagNameMap>(
@@ -113,7 +115,7 @@ export interface ConvertPanel {
 }
 
 /** Wires the Convert and Cancel buttons. */
-export function initConvertPanel({ engineStatus, project, settings }: Parts): ConvertPanel {
+export function initConvertPanel({ engineStatus, project, settings, calibrating }: Parts): ConvertPanel {
   const convertButton = byId('convert', HTMLButtonElement);
   const cancelButton = byId('cancel', HTMLButtonElement);
   const hint = byId('convert-hint', HTMLElement);
@@ -124,8 +126,10 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): Co
 
   function refresh(): void {
     const running = controller !== undefined;
+    const drawing = calibrating?.() ?? false;
     let reason = '';
-    if (engineStatus.isFailed()) reason = 'The music engine could not be loaded. Please reload the page.';
+    if (drawing) reason = 'Drawing the calibration page…';
+    else if (engineStatus.isFailed()) reason = 'The music engine could not be loaded. Please reload the page.';
     else if (!engineStatus.isReady()) reason = 'Waiting for the music engine…';
     else if (!project.project()?.files.length) reason = 'Add your LilyPond files first.';
     else if (project.selectedMainFiles().length === 0) reason = 'Choose at least one piece to convert.';
@@ -133,7 +137,7 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): Co
     convertButton.disabled = running || reason !== '';
     cancelButton.hidden = !running;
     for (const button of results.querySelectorAll<HTMLButtonElement>('button.preview-button'))
-      button.disabled = running;
+      button.disabled = running || drawing || !engineStatus.isReady();
     hint.textContent = running ? '' : reason;
   }
 
@@ -152,7 +156,7 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): Co
     onOutcome: (outcome: RunOutcome) => void | Promise<void>,
     focusAfter: () => HTMLElement,
   ): Promise<void> {
-    if (controller !== undefined) return;
+    if (controller !== undefined || calibrating?.()) return;
     controller = new AbortController();
     const { signal } = controller;
     preview.clear();

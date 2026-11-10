@@ -84,6 +84,16 @@
           <span id="note-size-text" aria-live="polite"></span>
         </div>
         <p id="page-size" aria-live="polite"></p>
+        <h3>Check what your reader shows</h3>
+        <p id="calibrate-help">
+          Some readers hide a few millimetres at the edges of the page. To find out how much, download this test page
+          and open it on your e-reader. Do not print it. Look at all four edges: if a border line is cut off, the small
+          ruler in the middle of that edge shows how many millimetres are hidden.
+        </p>
+        <button id="calibrate" type="button" aria-describedby="calibrate-help" disabled>
+          Download calibration page
+        </button>
+        <p id="calibrate-status" role="status" aria-live="polite" tabindex="-1"></p>
       </section>
       <section aria-labelledby="convert-heading">
         <h2 id="convert-heading">3. Convert</h2>
@@ -101,8 +111,23 @@
           <figcaption>Approximate e-ink look of page 1 (16 grey levels)</figcaption>
           <button id="preview-close" type="button">Close preview</button>
         </figure>
+        <details id="transfer-help">
+          <summary>How do I get the PDF onto my e-reader?</summary>
+          <div id="transfer-help-body"></div>
+        </details>
       </section>
     </main>
+    <footer class="site-footer">
+      <ul class="footer-links">
+        <li><a href="about.html">About &amp; licences</a></li>
+        <li><a href="https://github.com/ranacrocando/lily-on-eink-app">Source code of this app</a></li>
+        <li><a href="https://github.com/ranacrocando/lily-on-eink">Source code of the conversion library</a></li>
+      </ul>
+      <p>
+        Engraving by <a href="https://lilypond.org">LilyPond</a>, running in your browser thanks to
+        <a href="https://github.com/sightread/lilypond-wasm">lilypond-wasm</a> by Jake Fried.
+      </p>
+    </footer>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

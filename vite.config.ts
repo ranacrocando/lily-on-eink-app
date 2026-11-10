@@ -8,7 +8,10 @@ export default defineConfig({
   worker: { format: 'es' },
   build: {
     rollupOptions: {
-      input: { main: resolve(import.meta.dirname, 'index.html') },
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        about: resolve(import.meta.dirname, 'about.html'),
+      },
     },
   },
 });

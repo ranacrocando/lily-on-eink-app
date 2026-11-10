@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About &amp; licences – lily-on-eink</title>
+  </head>
+  <body>
+    <main id="app">
+      <p><a href="./">Back to the converter</a></p>
+      <h1>About &amp; licences</h1>
+      <p>
+        lily-on-eink turns your LilyPond sheet music into PDFs that fit your e-reader.
+        <strong>Your files never leave your browser: everything runs on your device.</strong>
+      </p>
+      <h2>Licence of this app</h2>
+      <p>
+        This app is free software under the GNU General Public License, version 3 or later (GPL-3.0-or-later). Read the
+        <a id="app-license" href="https://github.com/ranacrocando/lily-on-eink-app/blob/main/LICENSE"
+          >full licence text</a
+        >.
+      </p>
+      <h2>Source code</h2>
+      <ul>
+        <li><a href="https://github.com/ranacrocando/lily-on-eink-app">Source code of this app</a></li>
+        <li><a href="https://github.com/ranacrocando/lily-on-eink">Source code of the conversion library</a></li>
+      </ul>
+      <h2>Music engine</h2>
+      <p id="engine-info">Loading…</p>
+      <h2>Third-party licences</h2>
+      <p>The software this app is built from comes with its own licences. You can read each one here.</p>
+      <ul id="licence-list"></ul>
+      <p id="licence-error" class="problems" role="alert"></p>
+    </main>
+    <footer class="site-footer">
+      <ul class="footer-links">
+        <li><a href="about.html">About &amp; licences</a></li>
+        <li><a href="https://github.com/ranacrocando/lily-on-eink-app">Source code of this app</a></li>
+        <li><a href="https://github.com/ranacrocando/lily-on-eink">Source code of the conversion library</a></li>
+      </ul>
+      <p>
+        Engraving by <a href="https://lilypond.org">LilyPond</a>, running in your browser thanks to
+        <a href="https://github.com/sightread/lilypond-wasm">lilypond-wasm</a> by Jake Fried.
+      </p>
+    </footer>
+    <script type="module" src="/src/about.ts"></script>
+  </body>
+</html>

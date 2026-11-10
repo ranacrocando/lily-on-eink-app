@@ -29,7 +29,7 @@ function outcome(withPng: boolean) {
   };
 }
 
-function setup() {
+function setup(calibrating?: () => boolean) {
   document.body.innerHTML = `<button id="convert"></button><button id="cancel" hidden></button>
     <p id="convert-hint"></p><p id="progress-text" tabindex="-1"></p><div id="results"></div>
     <figure id="preview" hidden><div id="preview-frame"><canvas id="preview-canvas"></canvas></div>
@@ -42,6 +42,7 @@ function setup() {
       setLocked: vi.fn(),
     },
     settings: { current: () => resolved, setLocked: vi.fn() },
+    ...(calibrating ? { calibrating } : {}),
   });
 }
 
@@ -125,5 +126,30 @@ describe('convert panel preview', () => {
       expect(document.getElementById('progress-text')?.textContent).toContain('Error: boom');
     });
     expect(document.getElementById('preview')?.hidden).toBe(true);
+  });
+
+  it('keeps Convert and Preview disabled while the calibration page is drawn', async () => {
+    let drawing = false;
+    const panel = setup(() => drawing);
+    const convert = byId('convert', HTMLButtonElement);
+    expect(convert.disabled).toBe(false);
+    runConversion.mockResolvedValueOnce(outcome(false));
+    convert.click();
+    await vi.waitFor(() => {
+      expect(byText('Preview')).toBeDefined();
+    });
+    drawing = true;
+    panel.refresh();
+    expect(convert.disabled).toBe(true);
+    expect(byText('Preview').disabled).toBe(true);
+    expect(document.getElementById('convert-hint')?.textContent).toBe('Drawing the calibration page…');
+    convert.click();
+    byText('Preview').click();
+    await flush();
+    expect(runConversion).toHaveBeenCalledTimes(1);
+    drawing = false;
+    panel.refresh();
+    expect(convert.disabled).toBe(false);
+    expect(byText('Preview').disabled).toBe(false);
   });
 });
