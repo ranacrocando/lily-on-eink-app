@@ -25,6 +25,12 @@ and needs the secret `CORE_REPO_TOKEN` (read access to the core repository), sto
 Useful scripts: `npm run lint`, `npm run format`, `npm run typecheck`, `npm test`, `npm run build`
 (then `node scripts/check-build.mjs`), `npm run preview`.
 
+## Browser tests
+
+Run `npx playwright install chromium` once, then `npx playwright test`. It builds the app, serves it with `vite preview` and runs the smoke and parity tests in Chromium (the first conversion takes a minute). The report goes to `playwright-report/`.
+
+The parity test needs a test hook: when the page is opened with `?test` (for example `/lily-on-eink-app/?test`), `window.__lilyOnEink.convertPng(files, deviceId, profileId)` converts `files` (`{ path, text }[]`) with the app's engine and resolves with the first page PNG as base64. Without `?test` the hook does not exist. The test compares the PNG with the same conversion in Node (`createWasmEngine()`).
+
 ## License
 
 GPL-3.0-or-later, see [LICENSE](LICENSE). The LilyPond engine is bundled under its own licenses.

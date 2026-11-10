@@ -12,7 +12,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
         with:
@@ -50,3 +50,15 @@ jobs:
           npm test
           npm run build
           node scripts/check-build.mjs
+      - name: Install the test browser
+        working-directory: lily-on-eink-app
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests
+        working-directory: lily-on-eink-app
+        run: npx playwright test
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: lily-on-eink-app/playwright-report
+          retention-days: 7
