@@ -1,6 +1,6 @@
 import { analyzeProject, versionWarnings, type ProjectAnalysis } from '@lily-on-eink/core';
 import { byId } from './dom';
-import { fromDataTransfer, fromFileList, type LoadedProject } from './files';
+import { fromDataTransfer, fromFileList, placeProject, type LoadedProject, type PlacedProject } from './files';
 import { createLatest } from './latest';
 
 export interface ProjectPanel {
@@ -24,10 +24,19 @@ function list(className: string, items: string[]): HTMLUListElement {
   return ul;
 }
 
+function labelled<T extends HTMLElement>(el: T, label: string): T {
+  el.setAttribute('aria-label', label);
+  return el;
+}
+
 /** The message for an include that points at a file that was not uploaded. */
 export function missingIncludeMessage(from: string, target: string): string {
   return `${from} includes ${target}, which was not uploaded. Add the file or the whole folder.`;
 }
+
+/** Same text as the core's warning. */
+export const PLACEMENT_GAVE_UP =
+  'The include structure could not be sorted out automatically. Upload the whole project folder so the folder structure is kept.';
 
 /** Renders what was found in the project; `onSelect` is called when a checkbox changes. */
 export function renderProject(
@@ -35,6 +44,7 @@ export function renderProject(
   project: LoadedProject,
   analysis: ProjectAnalysis,
   onSelect: () => void,
+  placement: Pick<PlacedProject, 'notes' | 'gaveUp'> = { notes: [], gaveUp: false },
 ): void {
   const parts: HTMLElement[] = [];
   const count = project.files.length;
@@ -51,6 +61,8 @@ export function renderProject(
     skipped.textContent = `Skipped because they are larger than 2 MB: ${project.skipped.join(', ')}`;
     parts.push(skipped);
   }
+
+  if (placement.notes.length > 0) parts.push(labelled(list('notes', placement.notes), 'Notes'));
 
   if (analysis.mainFiles.length > 0) {
     const set = document.createElement('fieldset');
@@ -85,6 +97,7 @@ export function renderProject(
     );
   }
   const warnings = versionWarnings(analysis.versions).map((w) => w.message);
+  if (placement.gaveUp) warnings.unshift(PLACEMENT_GAVE_UP);
   if (project.notUtf8.length > 0) {
     warnings.unshift(`Not saved as UTF-8, special characters may look wrong: ${project.notUtf8.join(', ')}`);
   }
@@ -107,10 +120,12 @@ export function initProjectPanel(onChange: () => void, onBusyDrop?: (message: st
     Array.from(summary.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked'), (box) => box.value);
 
   const setProject = createLatest<LoadedProject>(
-    (project) => {
+    (loaded) => {
       if (locked) return; // a load that finishes during a conversion must not change the files being converted
+      const placed = placeProject(loaded);
+      const project = placed.project;
       current = project;
-      renderProject(summary, project, analyzeProject(project.texts), onChange);
+      renderProject(summary, project, analyzeProject(project.texts), onChange, placed);
       onChange();
     },
     (error) => {

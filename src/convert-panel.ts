@@ -4,7 +4,7 @@ import { byId } from './dom';
 import { dedupeNames, downloadBlob, zipFiles, zipFileName, type NamedFile } from './download';
 import type { EngineStatus } from './engine-status';
 import { firstPagePng, initPreview } from './preview';
-import type { ProjectPanel } from './project-panel';
+import { PLACEMENT_GAVE_UP, type ProjectPanel } from './project-panel';
 import type { SettingsPanel } from './settings-panel';
 import type { Resolved } from './settings';
 
@@ -35,10 +35,11 @@ function downloadButton(label: string, ariaLabel: string, onClick: () => void): 
   return button;
 }
 
-/** "error: message (file:line)" */
+/** "Error: message (file:line)"; info diagnostics are shown as "Note: …". */
 export function diagnosticText(d: Diagnostic): string {
   const where = d.file ? ` (${d.file}${d.line > 0 ? `:${String(d.line)}` : ''})` : '';
-  return `${d.severity === 'error' ? 'Error' : 'Warning'}: ${d.message}${where}`;
+  const label = d.severity === 'error' ? 'Error' : d.severity === 'warning' ? 'Warning' : 'Note';
+  return `${label}: ${d.message}${where}`;
 }
 
 /** Renders PDFs, messages and LilyPond logs of one conversion. */
@@ -87,10 +88,12 @@ export function renderResults(
     }
   }
 
-  if (result.diagnostics.length > 0) {
+  // The project panel already shows the "could not be sorted out" warning.
+  const shown = result.diagnostics.filter((d) => !(d.severity === 'warning' && d.message === PLACEMENT_GAVE_UP));
+  if (shown.length > 0) {
     parts.push(element('h3', 'Messages'));
     const ul = element('ul', undefined, 'diagnostics');
-    for (const d of result.diagnostics) ul.append(element('li', diagnosticText(d), d.severity));
+    for (const d of shown) ul.append(element('li', diagnosticText(d), d.severity));
     parts.push(ul);
   }
 
