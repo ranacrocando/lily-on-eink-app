@@ -14,21 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: lily-on-eink-app
           persist-credentials: false
       - name: Read the core ref
         id: core
         run: echo "ref=$(tr -d '[:space:]' < lily-on-eink-app/core-ref.txt)" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ranacrocando/lily-on-eink
           ref: ${{ steps.core.outputs.ref }}
           path: lily-on-eink
           token: ${{ secrets.CORE_REPO_TOKEN }}
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: lily-on-eink-app/.nvmrc
           cache: npm

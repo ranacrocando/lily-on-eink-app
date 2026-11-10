@@ -14,6 +14,8 @@ export interface RunInput {
   files: ProjectFile[];
   settings: Resolved;
   mainFiles: string[];
+  /** Default ['pdf']. */
+  outputs?: NonNullable<ConvertOptions['outputs']>;
   signal: AbortSignal;
   onProgress?: (p: Progress) => void;
 }
@@ -35,7 +37,7 @@ export async function runConversion(input: RunInput, engine: Engine): Promise<Ru
     device: settings.device,
     profile: settings.profile.id,
     mainFiles: input.mainFiles,
-    outputs: ['pdf'],
+    outputs: input.outputs ?? ['pdf'],
     signal: input.signal,
     timeoutMs: TIMEOUT_MS,
   };

@@ -7,13 +7,25 @@ export interface CalibrationFile {
   bytes: Uint8Array;
 }
 
+/** The engine stopped the run (for example because it was reloaded). Not an error for the user. */
+export class CalibrationCancelled extends Error {
+  constructor() {
+    super('calibration cancelled');
+    this.name = 'CalibrationCancelled';
+  }
+}
+
 /** "Calibration – Kobo Sage.pdf", safe for FAT32 drives. */
 export function calibrationFileName(deviceName: string): string {
   return `${safeFileName(`Calibration – ${deviceName}`)}.pdf`;
 }
 
 /** Compiles the calibration page of a device directly through the engine. Throws with the LilyPond log on failure. */
-export async function makeCalibration(engine: Engine, device: DeviceSpec): Promise<CalibrationFile> {
+export async function makeCalibration(
+  engine: Engine,
+  device: DeviceSpec,
+  signal?: AbortSignal,
+): Promise<CalibrationFile> {
   const source = calibrationSource(device, await engine.lilypondVersion());
   const result = await engine.compile({
     source,
@@ -21,7 +33,9 @@ export async function makeCalibration(engine: Engine, device: DeviceSpec): Promi
     files: {},
     formats: ['pdf'],
     timeoutMs: CALIBRATION_TIMEOUT_MS,
+    ...(signal ? { signal } : {}),
   });
+  if (result.aborted || signal?.aborted) throw new CalibrationCancelled();
   const pdfName = Object.keys(result.files).find((n) => n.toLowerCase().endsWith('.pdf'));
   const bytes = pdfName ? result.files[pdfName] : undefined;
   if (!result.ok || !bytes) {

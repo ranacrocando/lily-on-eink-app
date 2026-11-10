@@ -93,7 +93,7 @@
         <button id="calibrate" type="button" aria-describedby="calibrate-help" disabled>
           Download calibration page
         </button>
-        <p id="calibrate-status" role="status" aria-live="polite"></p>
+        <p id="calibrate-status" role="status" aria-live="polite" tabindex="-1"></p>
       </section>
       <section aria-labelledby="convert-heading">
         <h2 id="convert-heading">3. Convert</h2>
@@ -104,6 +104,13 @@
         <p id="convert-hint"></p>
         <p id="progress-text" role="status" aria-live="polite" tabindex="-1"></p>
         <div id="results"></div>
+        <figure id="preview" class="preview" hidden>
+          <div id="preview-frame" class="preview-frame">
+            <canvas id="preview-canvas" role="img" aria-label="Preview of page 1"></canvas>
+          </div>
+          <figcaption>Approximate e-ink look of page 1 (16 grey levels)</figcaption>
+          <button id="preview-close" type="button">Close preview</button>
+        </figure>
         <details id="transfer-help">
           <summary>How do I get the PDF onto my e-reader?</summary>
           <div id="transfer-help-body"></div>

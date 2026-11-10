@@ -157,3 +157,21 @@ pre {
   padding: 0;
   list-style: none;
 }
+.preview {
+  margin: 1rem 0;
+}
+.preview-frame {
+  --preview-ratio: 3 / 4;
+  aspect-ratio: var(--preview-ratio);
+  width: min(100%, calc(75vh * (var(--preview-ratio))));
+  border: 1px solid currentcolor;
+  background: #fff;
+}
+.preview-frame canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.preview figcaption {
+  margin: 0.5rem 0;
+}

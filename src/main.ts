@@ -26,11 +26,16 @@ if (isSupported()) {
   const settings = initSettingsPanel(() => {
     convertPanel.inputsChanged();
     calibration.refresh();
+    calibration.settingsChanged();
     help.update();
   });
   const calibration = initCalibrationPanel({
     engineStatus,
     settings,
+    project,
+    onBusyChange: () => {
+      convertPanel.refresh();
+    },
     getEngine: async () => (await import('./engine')).getEngine(),
   });
   const help = initHelpPanel(settings);
@@ -42,7 +47,12 @@ if (isSupported()) {
       calibration.setLocked(locked);
     },
   };
-  const convertPanel: ConvertPanel = initConvertPanel({ engineStatus, project, settings: lockingSettings });
+  const convertPanel: ConvertPanel = initConvertPanel({
+    engineStatus,
+    project,
+    settings: lockingSettings,
+    calibrating: () => calibration.isRunning(),
+  });
   void engineStatus.load();
 } else {
   const p = document.createElement('p');
