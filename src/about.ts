@@ -1,6 +1,7 @@
 import './styles.css';
 import { byId } from './dom';
 import { engineText, parseIndex, renderLicenseList } from './licenses';
+import { renderSourceLinks } from './source-links';
 
 const base = 'licenses/';
 
@@ -22,4 +23,9 @@ async function init(): Promise<void> {
   }
 }
 
+renderSourceLinks(byId('source-info', HTMLElement), byId('source-links', HTMLElement), {
+  appTag: import.meta.env.VITE_APP_VERSION,
+  coreVersion: import.meta.env.VITE_CORE_VERSION,
+  engineVersion: import.meta.env.VITE_ENGINE_VERSION,
+});
 void init();
