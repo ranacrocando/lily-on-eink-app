@@ -13,6 +13,19 @@
         <p id="engine-text">Loading the music engine (30 MB, once)…</p>
         <progress id="engine-progress"></progress>
       </section>
+      <section aria-labelledby="files-heading">
+        <h2 id="files-heading">1. Your files</h2>
+        <div id="drop-zone" class="drop-zone">
+          <p>Drop your LilyPond files (.ly, .ily) or a whole folder here.</p>
+          <div class="buttons">
+            <button id="choose-files" type="button">Choose files</button>
+            <button id="choose-folder" type="button">Choose a folder</button>
+          </div>
+        </div>
+        <input id="file-input" type="file" multiple accept=".ly,.ily" hidden />
+        <input id="folder-input" type="file" webkitdirectory hidden />
+        <div id="project-summary" aria-live="polite"></div>
+      </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

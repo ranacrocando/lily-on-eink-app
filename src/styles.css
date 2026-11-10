@@ -14,3 +14,63 @@ body {
 progress {
   width: 100%;
 }
+h2 {
+  font-size: 1.25rem;
+  margin: 2rem 0 0.5rem;
+}
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 1px solid currentcolor;
+  border-radius: 0.375rem;
+  background: Canvas;
+  color: CanvasText;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+:focus-visible {
+  outline: 3px solid Highlight;
+  outline-offset: 2px;
+}
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.drop-zone {
+  border: 2px dashed currentcolor;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+.drop-zone.active {
+  background: color-mix(in srgb, Highlight 15%, Canvas);
+}
+.drop-zone .buttons {
+  justify-content: center;
+}
+fieldset {
+  margin: 1rem 0;
+  border: 1px solid color-mix(in srgb, currentcolor 40%, Canvas);
+  border-radius: 0.375rem;
+}
+.check {
+  display: block;
+  padding: 0.25rem 0;
+}
+.warning,
+.warnings {
+  border-left: 4px solid #b58900;
+  padding-left: 0.75rem;
+}
+.problems {
+  border-left: 4px solid #c0392b;
+  padding-left: 1.75rem;
+}
+.warnings,
+.problems {
+  margin: 1rem 0;
+}
