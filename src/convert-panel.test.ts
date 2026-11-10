@@ -22,6 +22,9 @@ describe('diagnosticText', () => {
       'Warning: hm (a.ly)',
     );
     expect(diagnosticText({ file: '', line: 0, column: 0, severity: 'error', message: 'x' })).toBe('Error: x');
+    expect(diagnosticText({ file: 'a.ly', line: 0, column: 0, severity: 'info', message: 'fyi' })).toBe(
+      'Note: fyi (a.ly)',
+    );
   });
 });
 
@@ -68,6 +71,14 @@ describe('renderResults', () => {
     const summaries = Array.from(c.querySelectorAll('summary'), (s) => s.textContent);
     expect(summaries).toEqual(['Show LilyPond log for a.ly']);
     expect(c.querySelector('.diagnostics')?.textContent).toContain('Error: bad (a.ly:2)');
+  });
+
+  it('renders info diagnostics as calm notes', () => {
+    const diagnostics = [{ file: '', line: 0, column: 0, severity: 'info' as const, message: 'fyi' }];
+    const c = render({ outputs: [output('a.ly', 'Song.pdf')], diagnostics, logs: {} }, ['a.ly']);
+    const li = c.querySelector('.diagnostics li');
+    expect(li?.textContent).toBe('Note: fyi');
+    expect(li?.className).toBe('info');
   });
 
   it('shows no log for a file without a log (cancelled or timed out)', () => {

@@ -2,7 +2,8 @@
 import { analyzeProject } from '@lily-on-eink/core';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import type { LoadedProject } from './files';
-import { initProjectPanel, missingIncludeMessage, renderProject } from './project-panel';
+import { placeProject } from './files';
+import { PLACEMENT_GAVE_UP, initProjectPanel, missingIncludeMessage, renderProject } from './project-panel';
 
 function projectOf(texts: Record<string, string>): LoadedProject {
   return {
@@ -45,6 +46,49 @@ describe('renderProject warnings', () => {
     expect(container.querySelector('.warnings')?.textContent).toContain(
       'Not saved as UTF-8, special characters may look wrong: a.ly',
     );
+  });
+});
+
+describe('flat upload placement', () => {
+  const main = [
+    String.raw`\version "2.24.0"`,
+    String.raw`\include "parts/voice.ily"`,
+    String.raw`\score { \voice }`,
+  ].join('\n');
+  const voice = [String.raw`\version "2.24.0"`, 'voice = { c }'].join('\n');
+
+  it('places the include before analysing: one note, no missing include, only main.ly to convert', () => {
+    const placed = placeProject(projectOf({ 'main.ly': main, 'voice.ily': voice }));
+    expect(placed.project.files.map((f) => f.path).sort()).toEqual(['main.ly', 'parts/voice.ily']);
+    expect(Object.keys(placed.project.texts).sort()).toEqual(['main.ly', 'parts/voice.ily']);
+    const container = document.createElement('div');
+    renderProject(container, placed.project, analyzeProject(placed.project.texts), vi.fn(), placed);
+    expect(container.textContent).not.toContain('was not uploaded');
+    const notes = container.querySelectorAll('.notes li');
+    expect(notes).toHaveLength(1);
+    expect(notes[0]?.textContent).toBe('voice.ily was placed in parts/ because main.ly includes it from there.');
+    const boxes = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'), (b) => b.value);
+    expect(boxes).toEqual(['main.ly']);
+  });
+
+  it('leaves a project with folders alone', () => {
+    const project = projectOf({ 'main.ly': main, 'parts/voice.ily': voice });
+    const placed = placeProject(project);
+    expect(placed.project).toBe(project);
+    expect(placed.notes).toEqual([]);
+  });
+
+  it('shows the warning when the structure cannot be sorted out', () => {
+    const container = document.createElement('div');
+    const texts = { 'main.ly': main };
+    renderProject(container, projectOf(texts), analyzeProject(texts), vi.fn(), { notes: [], gaveUp: true });
+    expect(container.querySelector('.warnings')?.textContent).toContain(PLACEMENT_GAVE_UP);
+  });
+
+  it('gives up on a growing include cycle', () => {
+    const a = String.raw`\include "x/b.ily"`;
+    const b = String.raw`\include "x/b.ily"`;
+    expect(placeProject(projectOf({ 'a.ly': a, 'b.ily': b })).gaveUp).toBe(true);
   });
 });
 

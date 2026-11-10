@@ -1,4 +1,4 @@
-import type { ProjectFile } from '@lily-on-eink/core';
+import { applyMoves, placeIncludes, type PlacementPlan, type ProjectFile } from '@lily-on-eink/core';
 
 /** Files above this size are skipped (a LilyPond source is never this large). */
 export const MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -100,4 +100,60 @@ export async function fromDataTransfer(dt: DataTransfer): Promise<LoadedProject>
   const candidates: Candidate[] = [];
   for (const entry of entries) await walk(entry, candidates);
   return load(candidates);
+}
+
+/** A project with flat-uploaded include files moved to where they are included from, plus the notes for the panel. */
+export interface PlacedProject {
+  project: LoadedProject;
+  /** One sentence per placed file. */
+  notes: string[];
+  /** The include structure could not be sorted out automatically. */
+  gaveUp: boolean;
+}
+
+const dirOf = (p: string) => (p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
+const baseOf = (p: string) => p.slice(p.lastIndexOf('/') + 1);
+
+/** "a", "a and b", "a, b and c". */
+function listOf(items: string[]): string {
+  return items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1] ?? ''}`;
+}
+
+/** Notes in the wording of the core's `info` diagnostics; one per file, listing all folders it was copied to. */
+export function placementNotes(plan: PlacementPlan): string[] {
+  const byFrom = new Map<string, PlacementPlan['moves']>();
+  for (const m of plan.moves) byFrom.set(m.from, [...(byFrom.get(m.from) ?? []), m]);
+  const notes: string[] = [];
+  for (const group of byFrom.values()) {
+    const first = group[0];
+    if (!first) continue;
+    const where = listOf(group.map((m) => `${dirOf(m.to)}/`));
+    const includers = [...new Set(group.map((m) => m.includedBy))];
+    const who = `${listOf(includers)} ${includers.length === 1 ? 'includes' : 'include'}`;
+    notes.push(`${baseOf(first.to)} was placed in ${where} because ${who} it from there.`);
+  }
+  return notes;
+}
+
+/**
+ * Places flat-uploaded include files (the "Choose files" picker keeps no folders) before the project is analysed,
+ * so main-file detection, missing-include messages and the files passed to `convert()` all use the placed paths.
+ */
+export function placeProject(project: LoadedProject): PlacedProject {
+  const plan = placeIncludes(project.texts);
+  if (plan.moves.length === 0 && plan.keptAtTop.length === 0) {
+    return { project, notes: [], gaveUp: plan.gaveUp };
+  }
+  const byPath = applyMoves(Object.fromEntries(project.files.map((f) => [f.path, f])), plan);
+  const files = Object.entries(byPath).map(([path, f]) => ({ path, content: f.content }));
+  const notUtf8 = new Set(project.notUtf8);
+  const placed: LoadedProject = {
+    ...project,
+    files,
+    texts: applyMoves(project.texts, plan),
+    notUtf8: files
+      .map((f) => f.path)
+      .filter((p) => notUtf8.has(p) || plan.moves.some((m) => m.to === p && notUtf8.has(m.from))),
+  };
+  return { project: placed, notes: placementNotes(plan), gaveUp: false };
 }

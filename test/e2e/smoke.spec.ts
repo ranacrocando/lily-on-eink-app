@@ -61,3 +61,17 @@ test('converts a folder with an include', async ({ page }) => {
   await expect(page.locator('#results ul.results li')).toHaveCount(1, LONG);
   await expect(page.locator('#results')).not.toContainText('not found');
 });
+
+test('places flat-uploaded files where they are included from', async ({ page }) => {
+  await openReady(page);
+  const project = join(fixtures, 'folder-project');
+  await page.locator('#file-input').setInputFiles([join(project, 'main.ly'), join(project, 'parts', 'voice.ily')]);
+  const summary = page.locator('#project-summary');
+  await expect(summary).toContainText('voice.ily was placed in parts/ because main.ly includes it from there.');
+  await expect(summary).not.toContainText('was not uploaded');
+  await page.locator('#convert').click();
+  await expect(page.locator('#results ul.results li')).toHaveCount(1, LONG);
+  await expect(page.locator('#results')).not.toContainText('not found');
+  // The panel already placed the files, so the conversion has nothing left to report.
+  await expect(page.locator('#results')).not.toContainText('was placed');
+});

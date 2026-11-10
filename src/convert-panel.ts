@@ -35,10 +35,11 @@ function downloadButton(label: string, ariaLabel: string, onClick: () => void): 
   return button;
 }
 
-/** "error: message (file:line)" */
+/** "Error: message (file:line)"; info diagnostics are shown as "Note: …". */
 export function diagnosticText(d: Diagnostic): string {
   const where = d.file ? ` (${d.file}${d.line > 0 ? `:${String(d.line)}` : ''})` : '';
-  return `${d.severity === 'error' ? 'Error' : 'Warning'}: ${d.message}${where}`;
+  const label = d.severity === 'error' ? 'Error' : d.severity === 'warning' ? 'Warning' : 'Note';
+  return `${label}: ${d.message}${where}`;
 }
 
 /** Renders PDFs, messages and LilyPond logs of one conversion. */

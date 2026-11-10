@@ -70,8 +70,14 @@ fieldset {
   border-left: 4px solid #c0392b;
   padding-left: 1.75rem;
 }
+.notes {
+  border-left: 4px solid color-mix(in srgb, currentcolor 35%, Canvas);
+  padding-left: 1.75rem;
+  color: color-mix(in srgb, currentcolor 70%, Canvas);
+}
 .warnings,
-.problems {
+.problems,
+.notes {
   margin: 1rem 0;
 }
 .field {
@@ -124,6 +130,9 @@ input[type='number'] {
 }
 .diagnostics .error {
   color: #c0392b;
+}
+.diagnostics .info {
+  color: color-mix(in srgb, currentcolor 70%, Canvas);
 }
 .diagnostics .warning {
   border: 0;
