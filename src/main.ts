@@ -54,6 +54,11 @@ if (isSupported()) {
     calibrating: () => calibration.isRunning(),
   });
   void engineStatus.load();
+  if (new URLSearchParams(location.search).has('test')) {
+    void import('./test-hook').then((m) => {
+      m.installTestHook();
+    });
+  }
 } else {
   const p = document.createElement('p');
   p.textContent = `Please update your browser. This app needs ${MINIMUM_BROWSERS} or newer.`;

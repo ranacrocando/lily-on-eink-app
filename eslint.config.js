@@ -13,7 +13,7 @@ export default tseslint.config(
   },
   { files: ['**/*.{js,mjs}'], extends: [tseslint.configs.disableTypeChecked] },
   {
-    files: ['scripts/**', '**/*.mjs', 'vite.config.ts', 'vitest.config.ts'],
+    files: ['scripts/**', '**/*.mjs', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'test/**'],
     languageOptions: { globals: globals.node },
   },
   { files: ['src/**'], languageOptions: { globals: globals.browser } },
