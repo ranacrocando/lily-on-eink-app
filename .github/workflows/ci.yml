@@ -28,7 +28,7 @@ jobs:
           path: lily-on-eink
           token: ${{ secrets.CORE_REPO_TOKEN }}
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: lily-on-eink-app/.nvmrc
           cache: npm
