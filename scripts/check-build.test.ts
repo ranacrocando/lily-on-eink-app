@@ -20,4 +20,9 @@ describe('checkBuild', () => {
     const dup = [...good, { name: 'lilypond-def.wasm', size: 15 * MB }];
     expect(checkBuild(dup, 45 * MB)).toHaveLength(2);
   });
+  it('checks the about page and licences when the file list is given', () => {
+    const paths = ['about.html', 'licenses/index.json', 'licenses/THIRD-PARTY-NOTICES.txt'];
+    expect(checkBuild(good, 30 * MB, paths)).toEqual([]);
+    expect(checkBuild(good, 30 * MB, ['index.html'])).toHaveLength(3);
+  });
 });

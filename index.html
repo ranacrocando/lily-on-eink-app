@@ -84,6 +84,16 @@
           <span id="note-size-text" aria-live="polite"></span>
         </div>
         <p id="page-size" aria-live="polite"></p>
+        <h3>Check what your reader shows</h3>
+        <p id="calibrate-help">
+          Some readers hide a few millimetres at the edges of the page. To find out how much, download this test page
+          and open it on your e-reader. Do not print it. Look at all four edges: if a border line is cut off, the small
+          ruler in the middle of that edge shows how many millimetres are hidden.
+        </p>
+        <button id="calibrate" type="button" aria-describedby="calibrate-help" disabled>
+          Download calibration page
+        </button>
+        <p id="calibrate-status" role="status" aria-live="polite"></p>
       </section>
       <section aria-labelledby="convert-heading">
         <h2 id="convert-heading">3. Convert</h2>
@@ -94,7 +104,14 @@
         <p id="convert-hint"></p>
         <p id="progress-text" role="status" aria-live="polite" tabindex="-1"></p>
         <div id="results"></div>
+        <details id="transfer-help">
+          <summary>How do I get the PDF onto my e-reader?</summary>
+          <div id="transfer-help-body"></div>
+        </details>
       </section>
+      <footer>
+        <p><a href="about.html">About &amp; licences</a></p>
+      </footer>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
