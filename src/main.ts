@@ -5,10 +5,11 @@ import { isSupported, MINIMUM_BROWSERS } from './support';
 const app = byId('app', HTMLElement);
 
 async function start(): Promise<void> {
-  const { loadEngine } = await import('./engine');
   const text = byId('engine-text', HTMLElement);
   const bar = byId('engine-progress', HTMLProgressElement);
   try {
+    // Inside the try: a failed chunk load must show the error message instead of hanging.
+    const { loadEngine } = await import('./engine');
     const version = await loadEngine(
       ({ loadedBytes, totalBytes }) => {
         if (totalBytes > 0) {

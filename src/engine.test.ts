@@ -54,4 +54,12 @@ describe('engine', () => {
     expect(await loadEngine(undefined, onPreparing)).toBe('2.26.0');
     expect(onPreparing).not.toHaveBeenCalled();
   });
+
+  it('rejects when preload fails and does not report preparing', async () => {
+    fake.engine = makeEngine(() => Promise.reject(new Error('download failed')));
+    const { loadEngine } = await import('./engine');
+    const onPreparing = vi.fn();
+    await expect(loadEngine(undefined, onPreparing)).rejects.toThrow('download failed');
+    expect(onPreparing).not.toHaveBeenCalled();
+  });
 });

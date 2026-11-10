@@ -2,7 +2,11 @@ export const MINIMUM_BROWSERS = 'Chrome or Edge 116, Firefox 124 or Safari 17.4'
 
 type WorkerCtor = new (url: string, options?: WorkerOptions) => Worker;
 
-/** Module workers are detected by whether the constructor reads the `type` option. */
+/**
+ * Module workers are detected by whether the constructor reads the `type` option. The probe starts a Worker from
+ * a blob: URL, so a future Content-Security-Policy must allow `worker-src blob:`; otherwise the probe fails and
+ * the app wrongly asks the user to update the browser.
+ */
 function supportsModuleWorkers(Ctor: WorkerCtor): boolean {
   let read = false;
   const options = {

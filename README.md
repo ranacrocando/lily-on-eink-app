@@ -20,7 +20,7 @@ npm run dev
 
 After a change in core: rebuild core, delete `node_modules/@lily-on-eink` and run `npm install` again in this folder (npm does not re-copy an unchanged `file:` dependency).
 `core-ref.txt` holds the core commit the app is built against; CI checks out core at that commit
-and needs the repository secret `CORE_REPO_TOKEN` (read access to the core repository).
+and needs the secret `CORE_REPO_TOKEN` (read access to the core repository), stored both as an Actions secret and as a Dependabot secret (Dependabot PRs do not get Actions secrets).
 
 Useful scripts: `npm run lint`, `npm run format`, `npm run typecheck`, `npm test`, `npm run build`
 (then `node scripts/check-build.mjs`), `npm run preview`.
