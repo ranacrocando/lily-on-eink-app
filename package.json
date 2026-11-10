@@ -15,7 +15,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "privacy": "node scripts/privacy-check.mjs",
-    "prepare": "git config core.hooksPath .githooks || true"
+    "prepare": "git config core.hooksPath .githooks || true",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@lily-on-eink/core": "file:../lily-on-eink/packages/core",
@@ -28,8 +30,10 @@
     "@eslint/js": "10.0.1",
     "@types/node": "26.6.6",
     "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
     "globals": "17.14.0",
     "happy-dom": "21.0.4",
+    "prettier": "3.9.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.2",
     "vite": "8.3.7",
