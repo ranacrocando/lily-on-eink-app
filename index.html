@@ -13,6 +13,88 @@
         <p id="engine-text">Loading the music engine (30 MB, once)…</p>
         <progress id="engine-progress"></progress>
       </section>
+      <section aria-labelledby="files-heading">
+        <h2 id="files-heading">1. Your files</h2>
+        <div id="drop-zone" class="drop-zone">
+          <p>Drop your LilyPond files (.ly, .ily) or a whole folder here.</p>
+          <div class="buttons">
+            <button id="choose-files" type="button">Choose files</button>
+            <button id="choose-folder" type="button">Choose a folder</button>
+          </div>
+        </div>
+        <input id="file-input" type="file" multiple accept=".ly,.ily" hidden />
+        <input id="folder-input" type="file" webkitdirectory hidden />
+        <div id="project-summary" aria-live="polite"></div>
+      </section>
+      <section aria-labelledby="reader-heading">
+        <h2 id="reader-heading">2. Your e-reader</h2>
+        <div class="field">
+          <label for="device">E-reader</label>
+          <select id="device"></select>
+        </div>
+        <fieldset id="custom-size" hidden>
+          <legend>Screen size</legend>
+          <div class="row">
+            <div class="field">
+              <label for="custom-width">Width (pixels)</label>
+              <input
+                id="custom-width"
+                aria-describedby="custom-error"
+                type="number"
+                inputmode="numeric"
+                min="300"
+                max="4000"
+                step="1"
+              />
+            </div>
+            <div class="field">
+              <label for="custom-height">Height (pixels)</label>
+              <input
+                id="custom-height"
+                aria-describedby="custom-error"
+                type="number"
+                inputmode="numeric"
+                min="300"
+                max="4000"
+                step="1"
+              />
+            </div>
+            <div class="field">
+              <label for="custom-ppi">Pixels per inch</label>
+              <input
+                id="custom-ppi"
+                aria-describedby="custom-error"
+                type="number"
+                inputmode="numeric"
+                min="100"
+                max="600"
+                step="1"
+              />
+            </div>
+          </div>
+          <p id="custom-error" class="problems" aria-live="polite"></p>
+        </fieldset>
+        <div class="field">
+          <label for="profile">Type of music</label>
+          <select id="profile"></select>
+        </div>
+        <div class="field">
+          <label for="note-size">Size of the notes</label>
+          <input id="note-size" type="range" min="-3" max="3" step="1" value="0" aria-describedby="note-size-text" />
+          <span id="note-size-text" aria-live="polite"></span>
+        </div>
+        <p id="page-size" aria-live="polite"></p>
+      </section>
+      <section aria-labelledby="convert-heading">
+        <h2 id="convert-heading">3. Convert</h2>
+        <div class="buttons">
+          <button id="convert" type="button" class="primary" aria-describedby="convert-hint" disabled>Convert</button>
+          <button id="cancel" type="button" hidden>Cancel</button>
+        </div>
+        <p id="convert-hint"></p>
+        <p id="progress-text" role="status" aria-live="polite" tabindex="-1"></p>
+        <div id="results"></div>
+      </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
