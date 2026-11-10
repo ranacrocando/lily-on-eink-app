@@ -1,6 +1,7 @@
 import './styles.css';
 import { byId } from './dom';
 import { initProjectPanel } from './project-panel';
+import { initSettingsPanel } from './settings-panel';
 import { isSupported, MINIMUM_BROWSERS } from './support';
 
 const app = byId('app', HTMLElement);
@@ -36,6 +37,7 @@ async function start(): Promise<void> {
 if (isSupported()) {
   void start();
   initProjectPanel(() => undefined);
+  initSettingsPanel(() => undefined);
 } else {
   const p = document.createElement('p');
   p.textContent = `Please update your browser. This app needs ${MINIMUM_BROWSERS} or newer.`;

@@ -26,6 +26,41 @@
         <input id="folder-input" type="file" webkitdirectory hidden />
         <div id="project-summary" aria-live="polite"></div>
       </section>
+      <section aria-labelledby="reader-heading">
+        <h2 id="reader-heading">2. Your e-reader</h2>
+        <div class="field">
+          <label for="device">E-reader</label>
+          <select id="device"></select>
+        </div>
+        <fieldset id="custom-size" hidden>
+          <legend>Screen size</legend>
+          <div class="row">
+            <div class="field">
+              <label for="custom-width">Width (pixels)</label>
+              <input id="custom-width" type="number" inputmode="numeric" min="300" max="4000" step="1" />
+            </div>
+            <div class="field">
+              <label for="custom-height">Height (pixels)</label>
+              <input id="custom-height" type="number" inputmode="numeric" min="300" max="4000" step="1" />
+            </div>
+            <div class="field">
+              <label for="custom-ppi">Pixels per inch</label>
+              <input id="custom-ppi" type="number" inputmode="numeric" min="100" max="600" step="1" />
+            </div>
+          </div>
+          <p id="custom-error" class="problems" role="alert"></p>
+        </fieldset>
+        <div class="field">
+          <label for="profile">Type of music</label>
+          <select id="profile"></select>
+        </div>
+        <div class="field">
+          <label for="note-size">Size of the notes</label>
+          <input id="note-size" type="range" min="-3" max="3" step="1" value="0" aria-describedby="note-size-text" />
+          <span id="note-size-text" aria-live="polite"></span>
+        </div>
+        <p id="page-size" aria-live="polite"></p>
+      </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

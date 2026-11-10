@@ -74,3 +74,26 @@ fieldset {
 .problems {
   margin: 1rem 0;
 }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+select,
+input[type='number'] {
+  font: inherit;
+  padding: 0.4rem;
+  max-width: 100%;
+}
+input[type='number'] {
+  width: 8rem;
+}
+#custom-error:empty {
+  display: none;
+}
