@@ -135,3 +135,16 @@ pre {
   background: color-mix(in srgb, currentcolor 8%, Canvas);
   font-size: 0.85rem;
 }
+.site-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, currentcolor 25%, Canvas);
+  font-size: 0.85rem;
+  color: color-mix(in srgb, currentcolor 75%, Canvas);
+}
+.site-footer p {
+  margin: 0.25rem 0;
+}
+.site-footer a {
+  color: inherit;
+}
