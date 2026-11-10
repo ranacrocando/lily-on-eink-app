@@ -1,36 +1,32 @@
 # lily-on-eink-app
 
-Convert LilyPond files to PDFs that fit the size and aspect ratio of your e-reader, online.
-Everything runs in your browser: your files never leave your computer.
+Converts LilyPond files to PDFs that fit the screen of your e-reader.
 
-## Browser support
+## Use it
 
-Chrome or Edge 116, Firefox 124, Safari 17.4 or newer. Older browsers show an "update your browser" notice.
+Open https://ranacrocando.github.io/lily-on-eink-app/. Everything runs in your browser; your files never leave your computer.
 
-## Local development
+The conversion logic (LilyPond overlay, device presets, genre profiles, Node API) lives in the core library: https://github.com/ranacrocando/lily-on-eink
 
-The app uses the core library from the sibling repository `lily-on-eink`; both folders must sit next to each other:
+Minimum browsers: Chrome or Edge 116, Firefox 124, Safari 17.4. Older browsers show an "update your browser" notice.
+
+## Development
+
+The app needs the core repository `lily-on-eink` in a sibling folder:
 
 ```sh
 git clone <lily-on-eink> ../lily-on-eink
 (cd ../lily-on-eink && npm ci && npm run build)
-npm install      # installs the two core packages as copies (.npmrc: install-links=true)
+npm install      # copies the two core packages (.npmrc: install-links=true)
 npm run dev
 ```
 
-After a change in core: rebuild core, delete `node_modules/@lily-on-eink` and run `npm install` again in this folder (npm does not re-copy an unchanged `file:` dependency).
-`core-ref.txt` holds the core commit the app is built against; CI checks out core at that commit
-and needs the secret `CORE_REPO_TOKEN` (read access to the core repository), stored both as an Actions secret and as a Dependabot secret (Dependabot PRs do not get Actions secrets).
+After a change in core, rebuild it, delete `node_modules/@lily-on-eink` and run `npm install` again. `core-ref.txt` pins the core commit that CI builds against (secret `CORE_REPO_TOKEN`).
 
-Useful scripts: `npm run lint`, `npm run format`, `npm run typecheck`, `npm test`, `npm run build`
-(then `node scripts/check-build.mjs`), `npm run preview`.
+Other scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
 
-## Browser tests
-
-Run `npx playwright install chromium` once, then `npx playwright test`. It builds the app, serves it with `vite preview` and runs the smoke and parity tests in Chromium (the first conversion takes a minute). The report goes to `playwright-report/`.
-
-The parity test needs a test hook: when the page is opened with `?test` (for example `/lily-on-eink-app/?test`), `window.__lilyOnEink.convertPng(files, deviceId, profileId)` converts `files` (`{ path, text }[]`) with the app's engine and resolves with the first page PNG as base64. Without `?test` the hook does not exist. The test compares the PNG with the same conversion in Node (`createWasmEngine()`).
+Browser tests: run `npx playwright install chromium` once, then `npx playwright test`. The parity test uses a hook that exists only when the page is opened with `?test`.
 
 ## License
 
-GPL-3.0-or-later, see [LICENSE](LICENSE). The LilyPond engine is bundled under its own licenses.
+GPL-3.0-or-later, see [LICENSE](LICENSE). Bundled third-party licenses are listed on the app's About page.
