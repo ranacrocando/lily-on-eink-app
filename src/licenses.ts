@@ -30,15 +30,24 @@ export function engineText(index: LicenseIndex): string {
   return `LilyPond ${lilypond} via ${name} ${version}`;
 }
 
-/** Fills the list with one link per licence file; `base` is the folder that holds the files. */
+/** Fills the list with one entry per package and one link per licence file; `base` is the folder that holds the files. */
 export function renderLicenseList(list: HTMLElement, index: LicenseIndex, base: string): void {
+  const packages = [...new Set(index.files.map((f) => f.package))];
   list.replaceChildren(
-    ...index.files.map((entry) => {
+    ...packages.map((name) => {
+      const files = index.files.filter((f) => f.package === name);
       const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = `${base}${encodeURIComponent(entry.file)}`;
-      a.textContent = entry.file;
-      li.append(a, ` – ${entry.package} (${entry.license})`);
+      li.append(`${name} (${files[0]?.license ?? ''})`);
+      const inner = document.createElement('ul');
+      for (const entry of files) {
+        const item = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `${base}${encodeURIComponent(entry.file)}`;
+        a.textContent = entry.file;
+        item.append(a);
+        inner.append(item);
+      }
+      li.append(inner);
       return li;
     }),
   );

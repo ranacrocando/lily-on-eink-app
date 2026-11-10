@@ -17,10 +17,10 @@ describe('licenses', () => {
   it('names the engine', () => {
     expect(engineText(index)).toBe('LilyPond 2.26 via @sightread/lilypond-wasm 0.2.0');
   });
-  it('renders one link per file', () => {
+  it('renders one entry per package with a link per file', () => {
     const ul = document.createElement('ul');
     renderLicenseList(ul, index, 'licenses/');
     expect(ul.querySelector('a')?.getAttribute('href')).toBe('licenses/fflate-LICENSE');
-    expect(ul.textContent).toBe('fflate-LICENSE – fflate (MIT)');
+    expect(ul.textContent).toBe('fflate (MIT)fflate-LICENSE');
   });
 });
