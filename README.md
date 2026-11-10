@@ -27,6 +27,10 @@ Other scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
 
 Browser tests: run `npx playwright install chromium` once, then `npx playwright test`. The parity test uses a hook that exists only when the page is opened with `?test`.
 
+## Releases
+
+Publishing a release with tag `vX.Y.Z` (the `package.json` version) attaches the corresponding source of the bundled LilyPond engine (`lily-on-eink-engine-source-<engine version>.tar`) and then deploys the app to GitHub Pages; the About page links that asset. GPLv3 §6(d) requires this source to stay available: **never delete a release whose build was deployed, nor its source asset.**
+
 ## License
 
 GPL-3.0-or-later, see [LICENSE](LICENSE). Bundled third-party licenses are listed on the app's About page.
