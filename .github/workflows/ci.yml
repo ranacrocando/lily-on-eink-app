@@ -16,32 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          path: lily-on-eink-app
-          persist-credentials: false
-      - name: Read the core ref
-        id: core
-        run: echo "ref=$(tr -d '[:space:]' < lily-on-eink-app/core-ref.txt)" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v7
-        with:
-          repository: ranacrocando/lily-on-eink
-          ref: ${{ steps.core.outputs.ref }}
-          path: lily-on-eink
-          token: ${{ secrets.CORE_REPO_TOKEN }}
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version-file: lily-on-eink-app/.nvmrc
+          node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: |
-            lily-on-eink/package-lock.json
-            lily-on-eink-app/package-lock.json
-      - name: Build core
-        working-directory: lily-on-eink
-        run: |
-          npm ci
-          npm run build
       - name: Check the app
-        working-directory: lily-on-eink-app
         run: |
           npm ci
           npm run lint
@@ -51,14 +31,12 @@ jobs:
           npm run build
           node scripts/check-build.mjs
       - name: Install the test browser
-        working-directory: lily-on-eink-app
         run: npx playwright install --with-deps chromium
       - name: Browser tests
-        working-directory: lily-on-eink-app
         run: npx playwright test
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
-          path: lily-on-eink-app/playwright-report
+          path: playwright-report
           retention-days: 7
