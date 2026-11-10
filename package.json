@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "@lily-on-eink/core": "file:../lily-on-eink/packages/core",
-    "@lily-on-eink/engine-wasm": "file:../lily-on-eink/packages/engine-wasm"
+    "@lily-on-eink/engine-wasm": "file:../lily-on-eink/packages/engine-wasm",
+    "fflate": "0.8.3"
   },
   "overrides": {
     "@lily-on-eink/core": "$@lily-on-eink/core"
@@ -32,6 +33,7 @@
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
     "globals": "17.14.0",
+    "happy-dom": "21.0.4",
     "prettier": "3.9.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.2",
