@@ -1,12 +1,13 @@
 import './styles.css';
+import { byId } from './dom';
 import { isSupported, MINIMUM_BROWSERS } from './support';
 
-const app = document.getElementById('app') as HTMLElement;
+const app = byId('app', HTMLElement);
 
 async function start(): Promise<void> {
   const { loadEngine } = await import('./engine');
-  const text = document.getElementById('engine-text') as HTMLElement;
-  const bar = document.getElementById('engine-progress') as HTMLProgressElement;
+  const text = byId('engine-text', HTMLElement);
+  const bar = byId('engine-progress', HTMLProgressElement);
   try {
     const version = await loadEngine(
       ({ loadedBytes, totalBytes }) => {

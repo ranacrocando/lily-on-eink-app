@@ -25,7 +25,7 @@ function supportsModuleWorkers(Ctor: WorkerCtor): boolean {
 }
 
 /** Names of the browser features the app needs that are missing in `g` (default: the real globals). */
-export function missingFeatures(g: Record<string, unknown> = globalThis as Record<string, unknown>): string[] {
+export function missingFeatures(g: Record<string, unknown> = globalThis): string[] {
   const missing: string[] = [];
   const abortSignal = g.AbortSignal as { any?: unknown } | undefined;
   if (typeof abortSignal?.any !== 'function') missing.push('AbortSignal.any');

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error plain JS module without types
 import { checkBuild } from './check-build.mjs';
 
 const MB = 1024 * 1024;

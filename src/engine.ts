@@ -1,18 +1,5 @@
 import { createWasmEngine } from '@lily-on-eink/engine-wasm';
-import type { Engine } from '@lily-on-eink/core';
-
-export interface EngineProgress {
-  loadedBytes: number;
-  totalBytes: number;
-}
-
-interface PreloadOptions {
-  signal?: AbortSignal;
-  onProgress?: (p: EngineProgress) => void;
-}
-
-/** `preload` is optional on the core `Engine` (added in a later core version); it is detected at runtime. */
-type PreloadableEngine = Engine & { preload?: (options?: PreloadOptions) => Promise<void> };
+import type { Engine, EngineLoadProgress } from '@lily-on-eink/core';
 
 let engine: Engine | undefined;
 
@@ -25,15 +12,15 @@ export function getEngine(): Engine {
 /**
  * Loads the engine and resolves with the LilyPond version.
  * `onProgress` receives download progress when the engine supports `preload`; `onPreparing` is called once
- * the download is done and the version check (a full LilyPond run) starts. Without `preload` there is no
- * progress at all, so the caller shows an indeterminate bar.
+ * the download is done and the version check (a full LilyPond run) starts. An engine without `preload`
+ * reports no progress, so the caller shows an indeterminate bar.
  */
 export async function loadEngine(
-  onProgress?: (p: EngineProgress) => void,
+  onProgress?: (p: EngineLoadProgress) => void,
   onPreparing?: () => void,
 ): Promise<string> {
-  const e = getEngine() as PreloadableEngine;
-  if (typeof e.preload === 'function') {
+  const e = getEngine();
+  if (e.preload) {
     await e.preload({ onProgress });
     onPreparing?.();
   }

@@ -18,11 +18,11 @@ npm install      # installs the two core packages as copies (.npmrc: install-lin
 npm run dev
 ```
 
-After a change in core: rebuild core, then run `npm install` again in this folder.
+After a change in core: rebuild core, delete `node_modules/@lily-on-eink` and run `npm install` again in this folder (npm does not re-copy an unchanged `file:` dependency).
 `core-ref.txt` holds the core commit the app is built against; CI checks out core at that commit
 and needs the repository secret `CORE_REPO_TOKEN` (read access to the core repository).
 
-Useful scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`
+Useful scripts: `npm run lint`, `npm run format`, `npm run typecheck`, `npm test`, `npm run build`
 (then `node scripts/check-build.mjs`), `npm run preview`.
 
 ## License
