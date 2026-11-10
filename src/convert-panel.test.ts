@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import type { ConvertResult } from '@lily-on-eink/core';
 import { describe, expect, it, vi } from 'vitest';
+import { PLACEMENT_GAVE_UP } from './project-panel';
 import { diagnosticText, renderResults } from './convert-panel';
 
 const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
@@ -71,6 +72,12 @@ describe('renderResults', () => {
     const summaries = Array.from(c.querySelectorAll('summary'), (s) => s.textContent);
     expect(summaries).toEqual(['Show LilyPond log for a.ly']);
     expect(c.querySelector('.diagnostics')?.textContent).toContain('Error: bad (a.ly:2)');
+  });
+
+  it('hides the gave-up warning that the project panel already shows', () => {
+    const diagnostics = [{ file: '', line: 0, column: 0, severity: 'warning' as const, message: PLACEMENT_GAVE_UP }];
+    const c = render({ outputs: [output('a.ly', 'Song.pdf')], diagnostics, logs: {} }, ['a.ly']);
+    expect(c.querySelector('.diagnostics')).toBeNull();
   });
 
   it('renders info diagnostics as calm notes', () => {

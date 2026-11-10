@@ -146,14 +146,11 @@ export function placeProject(project: LoadedProject): PlacedProject {
   }
   const byPath = applyMoves(Object.fromEntries(project.files.map((f) => [f.path, f])), plan);
   const files = Object.entries(byPath).map(([path, f]) => ({ path, content: f.content }));
-  const notUtf8 = new Set(project.notUtf8);
   const placed: LoadedProject = {
     ...project,
     files,
     texts: applyMoves(project.texts, plan),
-    notUtf8: files
-      .map((f) => f.path)
-      .filter((p) => notUtf8.has(p) || plan.moves.some((m) => m.to === p && notUtf8.has(m.from))),
+    notUtf8: project.notUtf8.map((p) => plan.moves.find((m) => m.from === p)?.to ?? p),
   };
   return { project: placed, notes: placementNotes(plan), gaveUp: false };
 }

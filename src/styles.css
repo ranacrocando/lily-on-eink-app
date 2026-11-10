@@ -71,7 +71,7 @@ fieldset {
   padding-left: 1.75rem;
 }
 .notes {
-  border-left: 4px solid color-mix(in srgb, currentcolor 35%, Canvas);
+  border-left: 4px solid color-mix(in srgb, CanvasText 45%, Canvas);
   padding-left: 1.75rem;
   color: color-mix(in srgb, currentcolor 70%, Canvas);
 }

@@ -24,6 +24,11 @@ function list(className: string, items: string[]): HTMLUListElement {
   return ul;
 }
 
+function labelled<T extends HTMLElement>(el: T, label: string): T {
+  el.setAttribute('aria-label', label);
+  return el;
+}
+
 /** The message for an include that points at a file that was not uploaded. */
 export function missingIncludeMessage(from: string, target: string): string {
   return `${from} includes ${target}, which was not uploaded. Add the file or the whole folder.`;
@@ -57,7 +62,7 @@ export function renderProject(
     parts.push(skipped);
   }
 
-  if (placement.notes.length > 0) parts.push(list('notes', placement.notes));
+  if (placement.notes.length > 0) parts.push(labelled(list('notes', placement.notes), 'Notes'));
 
   if (analysis.mainFiles.length > 0) {
     const set = document.createElement('fieldset');

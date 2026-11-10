@@ -4,7 +4,7 @@ import { byId } from './dom';
 import { dedupeNames, downloadBlob, zipFiles, zipFileName, type NamedFile } from './download';
 import type { EngineStatus } from './engine-status';
 import { firstPagePng, initPreview } from './preview';
-import type { ProjectPanel } from './project-panel';
+import { PLACEMENT_GAVE_UP, type ProjectPanel } from './project-panel';
 import type { SettingsPanel } from './settings-panel';
 import type { Resolved } from './settings';
 
@@ -88,10 +88,12 @@ export function renderResults(
     }
   }
 
-  if (result.diagnostics.length > 0) {
+  // The project panel already shows the "could not be sorted out" warning.
+  const shown = result.diagnostics.filter((d) => !(d.severity === 'warning' && d.message === PLACEMENT_GAVE_UP));
+  if (shown.length > 0) {
     parts.push(element('h3', 'Messages'));
     const ul = element('ul', undefined, 'diagnostics');
-    for (const d of result.diagnostics) ul.append(element('li', diagnosticText(d), d.severity));
+    for (const d of shown) ul.append(element('li', diagnosticText(d), d.severity));
     parts.push(ul);
   }
 
