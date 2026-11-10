@@ -84,20 +84,17 @@ export function renderProject(
       ),
     );
   }
-  const warnings = versionWarnings(analysis.versions);
-  if (warnings.length > 0)
-    parts.push(
-      list(
-        'warnings',
-        warnings.map((w) => w.message),
-      ),
-    );
+  const warnings = versionWarnings(analysis.versions).map((w) => w.message);
+  if (project.notUtf8.length > 0) {
+    warnings.unshift(`Not saved as UTF-8, special characters may look wrong: ${project.notUtf8.join(', ')}`);
+  }
+  if (warnings.length > 0) parts.push(list('warnings', warnings));
 
   container.replaceChildren(...parts);
 }
 
 /** Wires the drop zone and the two file pickers. `onChange` runs after the project or the selection changed. */
-export function initProjectPanel(onChange: () => void): ProjectPanel {
+export function initProjectPanel(onChange: () => void, onBusyDrop?: (message: string) => void): ProjectPanel {
   const zone = byId('drop-zone', HTMLElement);
   const summary = byId('project-summary', HTMLElement);
   const fileInput = byId('file-input', HTMLInputElement);
@@ -111,11 +108,13 @@ export function initProjectPanel(onChange: () => void): ProjectPanel {
 
   const setProject = createLatest<LoadedProject>(
     (project) => {
+      if (locked) return; // a load that finishes during a conversion must not change the files being converted
       current = project;
       renderProject(summary, project, analyzeProject(project.texts), onChange);
       onChange();
     },
     (error) => {
+      if (locked) return;
       console.error(error);
       current = undefined;
       summary.textContent = 'Sorry, these files could not be read. Please try again.';
@@ -135,8 +134,11 @@ export function initProjectPanel(onChange: () => void): ProjectPanel {
       input.value = '';
     });
   }
-  // A file dropped next to the zone would make the browser open it, so a drop anywhere counts as a drop on the zone.
+  // Only file drags count: dragging text or a link must not touch the project. A file dropped next to the zone
+  // would make the browser open it, so a file drop anywhere counts as a drop on the zone.
+  const hasFiles = (event: DragEvent) => Array.from(event.dataTransfer?.types ?? []).includes('Files');
   window.addEventListener('dragover', (event) => {
+    if (!hasFiles(event)) return;
     event.preventDefault();
     if (!locked) zone.classList.add('active');
   });
@@ -144,9 +146,11 @@ export function initProjectPanel(onChange: () => void): ProjectPanel {
     if (!event.relatedTarget) zone.classList.remove('active');
   });
   window.addEventListener('drop', (event) => {
+    if (!hasFiles(event)) return;
     event.preventDefault();
     zone.classList.remove('active');
-    if (event.dataTransfer && !locked) void setProject(fromDataTransfer(event.dataTransfer));
+    if (locked) onBusyDrop?.('Please wait until the conversion is done.');
+    else if (event.dataTransfer) void setProject(fromDataTransfer(event.dataTransfer));
   });
 
   return {

@@ -95,6 +95,8 @@ export interface ConvertPanel {
   refresh(): void;
   /** Call when files, selection or settings changed: removes results that belong to the old input. */
   inputsChanged(): void;
+  /** Shows a message in the status area. */
+  notify(message: string): void;
 }
 
 /** Wires the Convert and Cancel buttons. */
@@ -189,5 +191,11 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): Co
     controller?.abort();
   });
   refresh();
-  return { refresh, inputsChanged };
+  return {
+    refresh,
+    inputsChanged,
+    notify: (message) => {
+      progress.textContent = message;
+    },
+  };
 }

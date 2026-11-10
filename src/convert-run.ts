@@ -49,6 +49,7 @@ export async function runConversion(input: RunInput, engine: Engine): Promise<Ru
     // The user knows they cancelled; do not show it as an error.
     result.diagnostics = result.diagnostics.filter((d) => !isAbort(d.message));
   } else {
+    // Only without a user cancel: after a cancel the timeout message is hidden together with the abort messages.
     result.diagnostics = result.diagnostics.map((d) =>
       isTimeout(d.message)
         ? {

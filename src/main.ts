@@ -12,9 +12,14 @@ if (isSupported()) {
   const engineStatus = initEngineStatus(() => {
     convertPanel.refresh();
   });
-  const project = initProjectPanel(() => {
-    convertPanel.inputsChanged();
-  });
+  const project = initProjectPanel(
+    () => {
+      convertPanel.inputsChanged();
+    },
+    (message) => {
+      convertPanel.notify(message);
+    },
+  );
   const settings = initSettingsPanel(() => {
     convertPanel.inputsChanged();
   });
