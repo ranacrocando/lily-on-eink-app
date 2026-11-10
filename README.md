@@ -4,15 +4,15 @@ Converts LilyPond files to PDFs that fit the screen of your e-reader.
 
 ## Use it
 
-Open https://ranacrocando.github.io/lily-on-eink-app/. Everything runs in your browser; your files never leave your computer.
+Open [ranacrocando.github.io/lily-on-eink-app](https://ranacrocando.github.io/lily-on-eink-app/). Everything runs in your browser; your files never leave your computer.
 
-The conversion logic (LilyPond overlay, device presets, genre profiles, Node API) lives in the core library: https://github.com/ranacrocando/lily-on-eink
+The conversion logic (LilyPond overlay, device presets, genre profiles, Node API) lives in the core library [lily-on-eink](https://github.com/ranacrocando/lily-on-eink).
 
 Minimum browsers: Chrome or Edge 116, Firefox 124, Safari 17.4. Older browsers show an "update your browser" notice.
 
 ## Development
 
-The app needs the core repository `lily-on-eink` in a sibling folder:
+The app needs the core repository [lily-on-eink](https://github.com/ranacrocando/lily-on-eink) in a sibling folder:
 
 ```sh
 git clone https://github.com/ranacrocando/lily-on-eink.git ../lily-on-eink
