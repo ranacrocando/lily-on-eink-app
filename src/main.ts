@@ -1,5 +1,5 @@
 import './styles.css';
-import { initConvertPanel } from './convert-panel';
+import { initConvertPanel, type ConvertPanel } from './convert-panel';
 import { byId } from './dom';
 import { initEngineStatus } from './engine-status';
 import { initProjectPanel } from './project-panel';
@@ -9,17 +9,16 @@ import { isSupported, MINIMUM_BROWSERS } from './support';
 const app = byId('app', HTMLElement);
 
 if (isSupported()) {
-  let refresh: () => void = () => undefined;
   const engineStatus = initEngineStatus(() => {
-    refresh();
+    convertPanel.refresh();
   });
   const project = initProjectPanel(() => {
-    refresh();
+    convertPanel.inputsChanged();
   });
   const settings = initSettingsPanel(() => {
-    refresh();
+    convertPanel.inputsChanged();
   });
-  refresh = initConvertPanel({ engineStatus, project, settings });
+  const convertPanel: ConvertPanel = initConvertPanel({ engineStatus, project, settings });
   void engineStatus.load();
 } else {
   const p = document.createElement('p');

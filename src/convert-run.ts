@@ -48,6 +48,16 @@ export async function runConversion(input: RunInput, engine: Engine): Promise<Ru
   if (cancelled) {
     // The user knows they cancelled; do not show it as an error.
     result.diagnostics = result.diagnostics.filter((d) => !isAbort(d.message));
+  } else {
+    result.diagnostics = result.diagnostics.map((d) =>
+      isTimeout(d.message)
+        ? {
+            ...d,
+            file: '',
+            message: `${d.file} took longer than ${String(TIMEOUT_MS / 1000)} seconds and was stopped.`,
+          }
+        : d,
+    );
   }
   return { result, engineReset, cancelled };
 }

@@ -1,8 +1,11 @@
 import { analyzeProject, versionWarnings, type ProjectAnalysis } from '@lily-on-eink/core';
 import { byId } from './dom';
 import { fromDataTransfer, fromFileList, type LoadedProject } from './files';
+import { createLatest } from './latest';
 
 export interface ProjectPanel {
+  /** While locked, the pickers and checkboxes are disabled and drops are ignored (a conversion is running). */
+  setLocked(locked: boolean): void;
   project(): LoadedProject | undefined;
   /** Main files whose checkbox is ticked. */
   selectedMainFiles(): string[];
@@ -99,47 +102,61 @@ export function initProjectPanel(onChange: () => void): ProjectPanel {
   const summary = byId('project-summary', HTMLElement);
   const fileInput = byId('file-input', HTMLInputElement);
   const folderInput = byId('folder-input', HTMLInputElement);
+  const buttons = [byId('choose-files', HTMLButtonElement), byId('choose-folder', HTMLButtonElement)];
   let current: LoadedProject | undefined;
+  let locked = false;
 
   const selectedMainFiles = () =>
     Array.from(summary.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked'), (box) => box.value);
 
-  async function setProject(read: Promise<LoadedProject>): Promise<void> {
-    try {
-      current = await read;
-      renderProject(summary, current, analyzeProject(current.texts), onChange);
-    } catch (error) {
+  const setProject = createLatest<LoadedProject>(
+    (project) => {
+      current = project;
+      renderProject(summary, project, analyzeProject(project.texts), onChange);
+      onChange();
+    },
+    (error) => {
       console.error(error);
       current = undefined;
       summary.textContent = 'Sorry, these files could not be read. Please try again.';
-    }
-    onChange();
-  }
+      onChange();
+    },
+  );
 
-  byId('choose-files', HTMLButtonElement).addEventListener('click', () => {
+  buttons[0]?.addEventListener('click', () => {
     fileInput.click();
   });
-  byId('choose-folder', HTMLButtonElement).addEventListener('click', () => {
+  buttons[1]?.addEventListener('click', () => {
     folderInput.click();
   });
   for (const input of [fileInput, folderInput]) {
     input.addEventListener('change', () => {
-      if (input.files?.length) void setProject(fromFileList(input.files));
+      if (input.files?.length && !locked) void setProject(fromFileList(input.files));
       input.value = '';
     });
   }
-  zone.addEventListener('dragover', (event) => {
+  // A file dropped next to the zone would make the browser open it, so a drop anywhere counts as a drop on the zone.
+  window.addEventListener('dragover', (event) => {
     event.preventDefault();
-    zone.classList.add('active');
+    if (!locked) zone.classList.add('active');
   });
-  zone.addEventListener('dragleave', () => {
-    zone.classList.remove('active');
+  window.addEventListener('dragleave', (event) => {
+    if (!event.relatedTarget) zone.classList.remove('active');
   });
-  zone.addEventListener('drop', (event) => {
+  window.addEventListener('drop', (event) => {
     event.preventDefault();
     zone.classList.remove('active');
-    if (event.dataTransfer) void setProject(fromDataTransfer(event.dataTransfer));
+    if (event.dataTransfer && !locked) void setProject(fromDataTransfer(event.dataTransfer));
   });
 
-  return { project: () => current, selectedMainFiles };
+  return {
+    project: () => current,
+    selectedMainFiles,
+    setLocked: (value) => {
+      locked = value;
+      for (const control of [...buttons, ...summary.querySelectorAll<HTMLInputElement>('input')]) {
+        control.disabled = value;
+      }
+    },
+  };
 }

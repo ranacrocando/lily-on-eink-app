@@ -11,6 +11,8 @@ export interface LoadedProject {
   texts: Record<string, string>;
   /** Paths of LilyPond files that were left out because they are too large. */
   skipped: string[];
+  /** Paths of files that are not valid UTF-8; they were decoded anyway, so special characters may look wrong. */
+  notUtf8: string[];
 }
 
 interface Candidate {
@@ -35,7 +37,7 @@ const isHidden = (path: string) => path.split('/').some((part) => part.startsWit
  * Paths keep their top-level folder: includes are relative, so nothing has to be stripped.
  */
 async function load(candidates: Candidate[]): Promise<LoadedProject> {
-  const result: LoadedProject = { files: [], texts: {}, skipped: [] };
+  const result: LoadedProject = { files: [], texts: {}, skipped: [], notUtf8: [] };
   const seen = new Set<string>();
   for (const { path: raw, file } of candidates) {
     const path = normalizePath(raw);
@@ -47,7 +49,12 @@ async function load(candidates: Candidate[]): Promise<LoadedProject> {
     }
     const content = new Uint8Array(await file.arrayBuffer());
     result.files.push({ path, content });
-    result.texts[path] = new TextDecoder().decode(content);
+    try {
+      result.texts[path] = new TextDecoder('utf-8', { fatal: true }).decode(content);
+    } catch {
+      result.texts[path] = new TextDecoder().decode(content);
+      result.notUtf8.push(path);
+    }
   }
   return result;
 }
@@ -70,6 +77,7 @@ const readBatch = (reader: FileSystemDirectoryReader) =>
 async function walk(entry: FileSystemEntry, out: Candidate[]): Promise<void> {
   if (entry.name.startsWith('.')) return;
   if (entry.isFile) {
+    if (!isSource(entry.name)) return;
     out.push({ path: entry.fullPath, file: await readFile(entry as FileSystemFileEntry) });
   } else if (entry.isDirectory) {
     const reader = (entry as FileSystemDirectoryEntry).createReader();

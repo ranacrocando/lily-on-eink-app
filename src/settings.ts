@@ -52,6 +52,16 @@ export function validateCustom(c: Partial<Record<keyof CustomSize, unknown>>): C
   return { widthPx: c.widthPx, heightPx: c.heightPx, ppi: c.ppi };
 }
 
+/** The custom size fields that are not valid. */
+export function invalidCustomFields(c: Partial<Record<keyof CustomSize, unknown>>): (keyof CustomSize)[] {
+  const { px, ppi } = SIZE_LIMITS;
+  const bad: (keyof CustomSize)[] = [];
+  if (!inRange(c.widthPx, px.min, px.max)) bad.push('widthPx');
+  if (!inRange(c.heightPx, px.min, px.max)) bad.push('heightPx');
+  if (!inRange(c.ppi, ppi.min, ppi.max)) bad.push('ppi');
+  return bad;
+}
+
 /** A device spec for a custom screen size. */
 export function customDevice(c: CustomSize): DeviceSpec {
   return {

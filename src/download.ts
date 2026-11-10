@@ -33,8 +33,8 @@ export function zipFileName(deviceName: string): string {
 }
 
 /** Saves bytes as a file through the browser's download. */
-export function downloadBlob(name: string, bytes: Uint8Array<ArrayBuffer>, type: string): void {
-  const url = URL.createObjectURL(new Blob([bytes], { type }));
+export function downloadBlob(name: string, bytes: Uint8Array, type: string): void {
+  const url = URL.createObjectURL(new Blob([bytes.slice()], { type }));
   const link = document.createElement('a');
   link.href = url;
   link.download = name;

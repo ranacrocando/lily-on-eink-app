@@ -46,6 +46,14 @@ describe('fromFileList', () => {
     expect(Object.keys(p.texts)).toEqual(['ok.ly']);
   });
 
+  it('lists files that are not valid UTF-8 and still decodes them', async () => {
+    const latin1 = new File([new Uint8Array([0x63, 0xfc, 0x72])], 'old.ly');
+    const p = await fromFileList([latin1, file('ok.ly', 'Für')]);
+    expect(p.notUtf8).toEqual(['old.ly']);
+    expect(p.texts['old.ly']).toBe('c�r');
+    expect(p.texts['ok.ly']).toBe('Für');
+  });
+
   it('decodes UTF-8', async () => {
     const p = await fromFileList([file('a.ly', 'Für Elise')]);
     expect(p.texts['a.ly']).toBe('Für Elise');
@@ -96,6 +104,18 @@ describe('fromDataTransfer', () => {
     const p = await fromDataTransfer(transfer([tree]));
     expect(p.files.map((f) => f.path).sort()).toEqual(['book/a.ly', 'book/c.ly', 'book/lib/b.ily']);
     expect(p.texts['book/a.ly']).toBe('A');
+  });
+
+  it('handles files and a folder dropped together and does not read other files', async () => {
+    let readOther = false;
+    const other = fileEntry('photo.jpg', '/photo.jpg');
+    (other as unknown as { file: () => void }).file = () => {
+      readOther = true;
+    };
+    const dir = dirEntry('p', '/p', [[fileEntry('a.ly', '/p/a.ly'), other]]);
+    const p = await fromDataTransfer(transfer([fileEntry('single.ly', '/single.ly'), dir, other]));
+    expect(p.files.map((f) => f.path).sort()).toEqual(['p/a.ly', 'single.ly']);
+    expect(readOther).toBe(false);
   });
 
   it('handles a single dropped file', async () => {

@@ -5,7 +5,12 @@ import type { LoadedProject } from './files';
 import { missingIncludeMessage, renderProject } from './project-panel';
 
 function projectOf(texts: Record<string, string>): LoadedProject {
-  return { files: Object.keys(texts).map((path) => ({ path, content: texts[path] ?? '' })), texts, skipped: [] };
+  return {
+    files: Object.keys(texts).map((path) => ({ path, content: texts[path] ?? '' })),
+    texts,
+    skipped: [],
+    notUtf8: [],
+  };
 }
 
 describe('renderProject', () => {

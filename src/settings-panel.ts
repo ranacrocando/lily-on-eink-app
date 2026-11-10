@@ -5,6 +5,7 @@ import {
   loadSettings,
   resolve,
   saveSettings,
+  invalidCustomFields,
   validateCustom,
   type CustomSize,
   type Resolved,
@@ -12,6 +13,8 @@ import {
 } from './settings';
 
 export interface SettingsPanel {
+  /** Disables all controls while a conversion is running. */
+  setLocked(locked: boolean): void;
   /** The chosen settings, or undefined while the custom size is invalid. */
   current(): Resolved | undefined;
 }
@@ -49,6 +52,9 @@ export function initSettingsPanel(onChange: () => void): SettingsPanel {
   height.value = String(initial.custom.heightPx);
   ppi.value = String(initial.custom.ppi);
 
+  /** The last valid custom size: this is what gets saved while the inputs are being edited. */
+  let lastValidCustom = initial.custom;
+
   const customValues = (): Partial<Record<keyof CustomSize, unknown>> => ({
     widthPx: width.valueAsNumber,
     heightPx: height.valueAsNumber,
@@ -57,9 +63,10 @@ export function initSettingsPanel(onChange: () => void): SettingsPanel {
 
   const read = (): Settings => {
     const custom = validateCustom(customValues());
+    if (typeof custom !== 'string') lastValidCustom = custom;
     return {
       deviceId: device.value,
-      custom: typeof custom === 'string' ? initial.custom : custom,
+      custom: lastValidCustom,
       profileId: profile.value,
       noteSizeDelta: noteSize.valueAsNumber,
     };
@@ -73,15 +80,21 @@ export function initSettingsPanel(onChange: () => void): SettingsPanel {
     customBox.hidden = !isCustom;
     const problem = isCustom ? validateCustom(customValues()) : undefined;
     customError.textContent = typeof problem === 'string' ? problem : '';
+    const bad = isCustom ? invalidCustomFields(customValues()) : [];
+    width.setAttribute('aria-invalid', String(bad.includes('widthPx')));
+    height.setAttribute('aria-invalid', String(bad.includes('heightPx')));
+    ppi.setAttribute('aria-invalid', String(bad.includes('ppi')));
     const settings = read();
     resolved = typeof problem === 'string' ? undefined : resolve(settings);
     if (resolved) {
       const delta = settings.noteSizeDelta;
       const change = delta === 0 ? 'standard' : `${delta > 0 ? '+' : ''}${String(delta)}`;
       noteSizeText.textContent = `Note size: ${String(resolved.staffSize)} (${change})`;
+      noteSize.setAttribute('aria-valuetext', noteSizeText.textContent);
       pageSize.textContent = `Page size: ${mm(resolved.pageMm.width)} × ${mm(resolved.pageMm.height)} mm`;
     } else {
       noteSizeText.textContent = `Note size: ${String(settings.noteSizeDelta)}`;
+      noteSize.setAttribute('aria-valuetext', noteSizeText.textContent);
       pageSize.textContent = 'Page size: enter a valid custom size.';
     }
     saveSettings(settings);
@@ -95,5 +108,10 @@ export function initSettingsPanel(onChange: () => void): SettingsPanel {
   }
   update();
 
-  return { current: () => resolved };
+  return {
+    current: () => resolved,
+    setLocked: (locked) => {
+      for (const input of [device, profile, noteSize, width, height, ppi]) input.disabled = locked;
+    },
+  };
 }

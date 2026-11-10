@@ -37,18 +37,42 @@
           <div class="row">
             <div class="field">
               <label for="custom-width">Width (pixels)</label>
-              <input id="custom-width" type="number" inputmode="numeric" min="300" max="4000" step="1" />
+              <input
+                id="custom-width"
+                aria-describedby="custom-error"
+                type="number"
+                inputmode="numeric"
+                min="300"
+                max="4000"
+                step="1"
+              />
             </div>
             <div class="field">
               <label for="custom-height">Height (pixels)</label>
-              <input id="custom-height" type="number" inputmode="numeric" min="300" max="4000" step="1" />
+              <input
+                id="custom-height"
+                aria-describedby="custom-error"
+                type="number"
+                inputmode="numeric"
+                min="300"
+                max="4000"
+                step="1"
+              />
             </div>
             <div class="field">
               <label for="custom-ppi">Pixels per inch</label>
-              <input id="custom-ppi" type="number" inputmode="numeric" min="100" max="600" step="1" />
+              <input
+                id="custom-ppi"
+                aria-describedby="custom-error"
+                type="number"
+                inputmode="numeric"
+                min="100"
+                max="600"
+                step="1"
+              />
             </div>
           </div>
-          <p id="custom-error" class="problems" role="alert"></p>
+          <p id="custom-error" class="problems" aria-live="polite"></p>
         </fieldset>
         <div class="field">
           <label for="profile">Type of music</label>
@@ -68,7 +92,7 @@
           <button id="cancel" type="button" hidden>Cancel</button>
         </div>
         <p id="convert-hint"></p>
-        <p id="progress-text" role="status" aria-live="polite"></p>
+        <p id="progress-text" role="status" aria-live="polite" tabindex="-1"></p>
         <div id="results"></div>
       </section>
     </main>

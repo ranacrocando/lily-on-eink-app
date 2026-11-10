@@ -38,7 +38,12 @@ export function diagnosticText(d: Diagnostic): string {
 }
 
 /** Renders PDFs, messages and LilyPond logs of one conversion. */
-function renderResults(container: HTMLElement, result: ConvertResult, mainFiles: string[], zipName: string): void {
+export function renderResults(
+  container: HTMLElement,
+  result: ConvertResult,
+  mainFiles: string[],
+  zipName: string,
+): void {
   const parts: HTMLElement[] = [];
   const pdfs = result.outputs.flatMap((o) => (o.pdf ? [{ bytes: o.pdf, fileName: o.fileName }] : []));
   const names = dedupeNames(pdfs.map((p) => p.fileName));
@@ -52,7 +57,7 @@ function renderResults(container: HTMLElement, result: ConvertResult, mainFiles:
       li.append(
         element('span', file.name, 'file-name'),
         downloadButton('Download', `Download ${file.name}`, () => {
-          downloadBlob(file.name, file.bytes as Uint8Array<ArrayBuffer>, 'application/pdf');
+          downloadBlob(file.name, file.bytes, 'application/pdf');
         }),
       );
       ul.append(li);
@@ -61,7 +66,7 @@ function renderResults(container: HTMLElement, result: ConvertResult, mainFiles:
     if (files.length > 1) {
       parts.push(
         downloadButton('Download all (ZIP)', 'Download all PDFs as one ZIP file', () => {
-          downloadBlob(zipName, zipFiles(files) as Uint8Array<ArrayBuffer>, 'application/zip');
+          downloadBlob(zipName, zipFiles(files), 'application/zip');
         }),
       );
     }
@@ -74,7 +79,9 @@ function renderResults(container: HTMLElement, result: ConvertResult, mainFiles:
     parts.push(ul);
   }
 
-  const failed = mainFiles.filter((m) => !result.outputs.some((o) => o.mainFile === m) && m in result.logs);
+  const failed = mainFiles.filter(
+    (m) => !result.outputs.some((o) => o.mainFile === m) && (result.logs[m] ?? '').trim() !== '',
+  );
   for (const main of failed) {
     const details = element('details');
     details.append(element('summary', `Show LilyPond log for ${main}`), element('pre', result.logs[main]));
@@ -83,8 +90,15 @@ function renderResults(container: HTMLElement, result: ConvertResult, mainFiles:
   container.replaceChildren(...parts);
 }
 
-/** Wires the Convert and Cancel buttons. Returns a function that updates the button after any change. */
-export function initConvertPanel({ engineStatus, project, settings }: Parts): () => void {
+export interface ConvertPanel {
+  /** Updates the Convert button after the engine status changed. */
+  refresh(): void;
+  /** Call when files, selection or settings changed: removes results that belong to the old input. */
+  inputsChanged(): void;
+}
+
+/** Wires the Convert and Cancel buttons. */
+export function initConvertPanel({ engineStatus, project, settings }: Parts): ConvertPanel {
   const convertButton = byId('convert', HTMLButtonElement);
   const cancelButton = byId('cancel', HTMLButtonElement);
   const hint = byId('convert-hint', HTMLElement);
@@ -95,7 +109,8 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): ()
   function refresh(): void {
     const running = controller !== undefined;
     let reason = '';
-    if (!engineStatus.isReady()) reason = 'Waiting for the music engine…';
+    if (engineStatus.isFailed()) reason = 'The music engine could not be loaded. Please reload the page.';
+    else if (!engineStatus.isReady()) reason = 'Waiting for the music engine…';
     else if (!project.project()?.files.length) reason = 'Add your LilyPond files first.';
     else if (project.selectedMainFiles().length === 0) reason = 'Choose at least one piece to convert.';
     else if (!settings.current()) reason = 'Check the screen size of your e-reader.';
@@ -114,6 +129,8 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): ()
     const { signal } = controller;
     results.replaceChildren();
     progress.textContent = 'Starting…';
+    project.setLocked(true);
+    settings.setLocked(true);
     refresh();
     cancelButton.focus();
     let reload = false;
@@ -142,10 +159,26 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): ()
       progress.textContent = 'Sorry, something went wrong. Please try again.';
     }
     controller = undefined;
+    project.setLocked(false);
+    settings.setLocked(false);
     refresh();
-    convertButton.focus();
     // A cancel or timeout stops the engine's worker; load it again now instead of during the next conversion.
-    if (reload) await engineStatus.load();
+    if (reload) {
+      // Convert is disabled until the engine is back, so the status text gets the focus meanwhile.
+      progress.focus();
+      await engineStatus.load();
+      if (document.activeElement === progress && !convertButton.disabled) convertButton.focus();
+    } else {
+      convertButton.focus();
+    }
+  }
+
+  function inputsChanged(): void {
+    if (controller === undefined) {
+      results.replaceChildren();
+      progress.textContent = '';
+    }
+    refresh();
   }
 
   convertButton.addEventListener('click', () => {
@@ -156,5 +189,5 @@ export function initConvertPanel({ engineStatus, project, settings }: Parts): ()
     controller?.abort();
   });
   refresh();
-  return refresh;
+  return { refresh, inputsChanged };
 }

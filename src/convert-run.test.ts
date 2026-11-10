@@ -115,6 +115,8 @@ describe('runConversion', () => {
     );
     expect(outcome.cancelled).toBe(false);
     expect(outcome.engineReset).toBe(true);
-    expect(outcome.result.diagnostics.some((d) => d.message.includes('timed out'))).toBe(true);
+    expect(outcome.result.diagnostics.map((d) => d.message)).toContain(
+      'a.ly took longer than 60 seconds and was stopped.',
+    );
   });
 });

@@ -2,6 +2,8 @@ import { byId } from './dom';
 
 export interface EngineStatus {
   isReady(): boolean;
+  /** True when loading failed; only a page reload helps. */
+  isFailed(): boolean;
   /** Loads the engine (again) and shows the progress bar until it is ready. Does nothing while a load is running. */
   load(): Promise<void>;
 }
@@ -11,12 +13,16 @@ export function initEngineStatus(onChange: () => void): EngineStatus {
   const text = byId('engine-text', HTMLElement);
   const bar = byId('engine-progress', HTMLProgressElement);
   let ready = false;
+  let failed = false;
+  let loadedBefore = false;
   let loading: Promise<void> | undefined;
 
   async function run(): Promise<void> {
     ready = false;
+    failed = false;
     onChange();
-    text.textContent = 'Loading the music engine (30 MB, once)…';
+    text.textContent = loadedBefore ? 'Restarting the music engine…' : 'Loading the music engine (30 MB, once)…';
+    loadedBefore = true;
     bar.removeAttribute('value');
     bar.removeAttribute('max');
     bar.hidden = false;
@@ -41,6 +47,7 @@ export function initEngineStatus(onChange: () => void): EngineStatus {
       ready = true;
     } catch (error) {
       bar.hidden = true;
+      failed = true;
       text.textContent = 'The music engine could not be loaded. Please reload the page.';
       console.error(error);
     }
@@ -49,6 +56,7 @@ export function initEngineStatus(onChange: () => void): EngineStatus {
 
   return {
     isReady: () => ready,
+    isFailed: () => failed,
     load: () => {
       loading ??= run().finally(() => {
         loading = undefined;
