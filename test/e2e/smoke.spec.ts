@@ -34,6 +34,7 @@ test('converts, downloads and previews a single file', async ({ page }) => {
   await rows.getByRole('button', { name: /^Preview / }).click();
   const canvas = page.locator('#preview-canvas');
   await expect(canvas).toBeVisible(LONG);
+  // Kobo Sage: 1440 × 1920 px (packages/core presets).
   await expect(canvas).toHaveJSProperty('width', 1440, LONG);
   await expect(canvas).toHaveJSProperty('height', 1920);
 });

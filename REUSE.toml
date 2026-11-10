@@ -8,6 +8,6 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 
 [[annotations]]
 path = ["test/fixtures/**"]
-precedence = "aggregate"
+precedence = "override"
 SPDX-FileCopyrightText = "lily-on-eink contributors"
 SPDX-License-Identifier = "CC0-1.0"
