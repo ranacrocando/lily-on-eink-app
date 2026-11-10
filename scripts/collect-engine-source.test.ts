@@ -6,10 +6,8 @@ import { describe, expect, it } from 'vitest';
 import {
   EXTRA_ARCHIVES,
   lockedIntegrity,
-  readProducers,
   readmeSource,
   sha256,
-  toolchainText,
   verifyIntegrity,
   verifySha256,
   writePortableTar,
@@ -56,34 +54,6 @@ describe('hash checks', () => {
   });
 });
 
-const str = (s: string) => [enc.encode(s).length, ...enc.encode(s)];
-
-/** A WebAssembly module with an empty type section and the given custom sections. */
-function wasm(custom: Record<string, number[]>): Uint8Array {
-  const out = [0, 0x61, 0x73, 0x6d, 1, 0, 0, 0, 1, 1, 0];
-  for (const [name, body] of Object.entries(custom)) {
-    const content = [...str(name), ...body];
-    out.push(0, content.length, ...content);
-  }
-  return new Uint8Array(out);
-}
-
-describe('readProducers', () => {
-  it('reads the producers section', () => {
-    const body = [1, ...str('processed-by'), 1, ...str('clang'), ...str('21.0.0')];
-    const producers = readProducers(wasm({ name: [0], producers: body }));
-    expect(producers).toEqual({ 'processed-by': [['clang', '21.0.0']] });
-    expect(toolchainText(producers)).toBe('clang 21.0.0');
-  });
-  it('returns nothing for a module without it', () => {
-    expect(readProducers(wasm({ name: [0] }))).toEqual({});
-    expect(toolchainText({})).toMatch(/no producers section/);
-  });
-  it('rejects other files', () => {
-    expect(() => readProducers(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))).toThrow(/not a WebAssembly module/);
-  });
-});
-
 describe('writePortableTar', () => {
   it('writes no local owner, ids or times, in the given order', () => {
     const dir = mkdtempSync(join(tmpdir(), 'engine-source-'));
@@ -118,18 +88,17 @@ describe('writePortableTar', () => {
 });
 
 describe('readmeSource', () => {
-  it('names the archives, the toolchain and the exact source trees', () => {
+  it('names the archives, the toolchain note and the exact source trees', () => {
     const text = readmeSource({
       engineVersion: '0.2.0',
       packFile: 'sightread-lilypond-wasm-0.2.0.tgz',
       integrity: 'sha512-x',
       appVersion: '0.1.0',
       coreVersion: '0.1.0',
-      toolchain: 'clang 21.0.0',
       archives: [{ path: 'upstream/a.tar.gz', url: 'https://example.org/a.tar.gz', sha256: helloSha256 }],
     });
     expect(text).toContain(`upstream/a.tar.gz\n    https://example.org/a.tar.gz\n    SHA-256 ${helloSha256}`);
-    expect(text).toContain('clang 21.0.0');
+    expect(text).toContain('not part of the corresponding source');
     expect(text).toContain('https://github.com/ranacrocando/lily-on-eink-app/tree/v0.1.0');
     expect(text).toContain('https://github.com/ranacrocando/lily-on-eink/tree/v0.1.0');
   });

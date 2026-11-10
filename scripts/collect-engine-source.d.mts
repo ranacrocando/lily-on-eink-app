@@ -15,8 +15,6 @@ export function lockedIntegrity(
   name: string,
   version: string,
 ): string;
-export function readProducers(bytes: Uint8Array): Record<string, [string, string][]>;
-export function toolchainText(producers: Record<string, [string, string][]>): string;
 export function writePortableTar(cwd: string, files: string[], out: string): void;
 export function readmeSource(info: {
   engineVersion: string;
@@ -24,7 +22,6 @@ export function readmeSource(info: {
   integrity: string;
   appVersion: string;
   coreVersion: string;
-  toolchain: string;
   archives: { path: string; url: string; sha256: string }[];
 }): string;
 export function collectEngineSource(root: string, outDir: string): Promise<string>;

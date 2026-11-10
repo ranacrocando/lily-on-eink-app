@@ -38,7 +38,9 @@ export const EXTRA_ARCHIVES = [
     requires: 'glib-2.82.5.tar.xz',
   },
   {
-    // The URW release LilyPond 2.26.0's binaries ship (lilypond-2.26.0/release/binaries/lib/fonts.py).
+    // The URW release LilyPond 2.26.0's binaries ship (lilypond-2.26.0/release/binaries/lib/fonts.py). This is a
+    // tag archive GitHub generates: a hash mismatch most likely means GitHub regenerated it. Then check that its
+    // fonts are still those of the tag and pin the new hash.
     folder: 'fonts',
     name: 'urw-base35-fonts-20200910.zip',
     url: 'https://github.com/ArtifexSoftware/urw-base35-fonts/archive/refs/tags/20200910.zip',
@@ -96,62 +98,6 @@ export function lockedIntegrity(lock, name, version) {
 }
 
 /**
- * The `producers` custom section of a WebAssembly module: field name -> [[tool, version], …].
- * @param {Uint8Array} bytes
- * @returns {Record<string, [string, string][]>}
- */
-export function readProducers(bytes) {
-  const decoder = new TextDecoder();
-  let pos = 8;
-  const u32 = () => {
-    let result = 0;
-    let shift = 0;
-    for (;;) {
-      const byte = bytes[pos++];
-      if (byte === undefined) throw new Error('truncated WebAssembly module');
-      result += (byte & 0x7f) * 2 ** shift;
-      if (byte < 0x80) return result;
-      shift += 7;
-    }
-  };
-  const str = () => {
-    const length = u32();
-    const s = decoder.decode(bytes.subarray(pos, pos + length));
-    pos += length;
-    return s;
-  };
-  if (bytes[0] !== 0 || bytes[1] !== 0x61 || bytes[2] !== 0x73 || bytes[3] !== 0x6d)
-    throw new Error('not a WebAssembly module');
-  while (pos < bytes.length) {
-    const id = bytes[pos++];
-    const size = u32();
-    const end = pos + size;
-    if (id === 0 && str() === 'producers') {
-      /** @type {Record<string, [string, string][]>} */
-      const fields = {};
-      for (let n = u32(); n > 0; n--) {
-        const field = str();
-        const values = /** @type {[string, string][]} */ ([]);
-        for (let m = u32(); m > 0; m--) values.push([str(), str()]);
-        fields[field] = values;
-      }
-      return fields;
-    }
-    pos = end;
-  }
-  return {};
-}
-
-/** "clang 21.0.0 (https://…)" from the producers section, or a note that it is missing. */
-export function toolchainText(/** @type {Record<string, [string, string][]>} */ producers) {
-  const tools = producers['processed-by'] ?? [];
-  return tools.length
-    ? tools.map(([tool, version]) => `${tool} ${version}`).join('\n  ')
-    : 'nothing: lilypond.wasm has no producers section (Emscripten leaves it out of release builds),\n' +
-        '  so the exact Emscripten version is not recorded. DEVELOPMENT.md installs it with Homebrew.';
-}
-
-/**
  * Writes an uncompressed, portable tar of `files` (relative to `cwd`, in the given order) to `out`.
  * @param {string} cwd @param {string[]} files @param {string} out
  */
@@ -162,7 +108,7 @@ export function writePortableTar(cwd, files, out) {
 /**
  * The README-SOURCE.txt of the bundle.
  * @param {{ engineVersion: string, packFile: string, integrity: string, appVersion: string, coreVersion: string,
- *   toolchain: string, archives: { path: string, url: string, sha256: string }[] }} info
+ *   archives: { path: string, url: string, sha256: string }[] }} info
  */
 export function readmeSource(info) {
   const list = info.archives.map((a) => `  ${a.path}\n    ${a.url}\n    SHA-256 ${a.sha256}`).join('\n');
@@ -180,8 +126,8 @@ Contents
 
   ${info.packFile}
     The engine package exactly as published on npm (integrity ${info.integrity}).
-    Next to the compiled engine (dist/) it holds the build: build/build.sh, build/patches/,
-    build/stubs/, build/sources.json, build/fetch-sources.mjs, DEVELOPMENT.md, and the
+    Next to the compiled engine (dist/) it holds the build: build/ (build.sh and its helper
+    scripts, patches/, stubs/, sources.json, fetch-sources.mjs), DEVELOPMENT.md, and the
     licence texts and third-party notices in licenses/.
 
 ${list}
@@ -190,6 +136,9 @@ ${list}
   patch, which GLib's Meson subproject downloads during the build
   (glib-2.82.5/subprojects/pcre2.wrap). fonts/ holds the upstream releases of the URW Base35
   and TeX Gyre fonts that LilyPond 2.26.0 ships; Emmentaler is built from the LilyPond archive.
+  GLib's other fallback wrap, proxy-libintl, is not used: Emscripten's libc provides gettext
+  (lilypond.wasm calls libc's dcngettext and contains none of proxy-libintl's g_libintl_*
+  functions).
 
 How to rebuild
 
@@ -205,9 +154,8 @@ How to rebuild
      the native install is built from the same lilypond-2.26.0 archive and the font releases in
      fonts/.
 
-The toolchain is a general-purpose compiler and not part of the corresponding source. The
-producers section of dist/lilypond.wasm records:
-  ${info.toolchain}
+The Emscripten version is not recorded in the build; DEVELOPMENT.md installs Emscripten with
+Homebrew. The toolchain is a general-purpose tool and not part of the corresponding source.
 
 The source of the app itself, and of the core library with the engine adapter
 (@lily-on-eink/engine-wasm) the app bundles:
@@ -286,7 +234,6 @@ export async function collectEngineSource(root, outDir) {
     writeFileSync(join(stage, archive.folder, archive.name), bytes);
   }
 
-  const toolchain = toolchainText(readProducers(readFileSync(join(engineDir, 'dist', 'lilypond.wasm'))));
   writeFileSync(
     join(stage, 'README-SOURCE.txt'),
     readmeSource({
@@ -295,7 +242,6 @@ export async function collectEngineSource(root, outDir) {
       integrity,
       appVersion,
       coreVersion,
-      toolchain,
       archives: archives.map((a) => ({ path: `${a.folder}/${a.name}`, url: a.url, sha256: a.sha256 })),
     }),
   );

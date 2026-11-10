@@ -2,7 +2,8 @@ name: Release
 # A published app release gets the corresponding source of the bundled engine attached (GPLv3 section 6(d)) and is
 # then deployed to GitHub Pages. Manual runs redo both for an existing release.
 #
-# Needs no core checkout: npm ci installs core and engine-wasm from their release tarballs (package-lock.json).
+# Needs no core checkout: npm ci installs core and engine-wasm from their release tarballs (package-lock.json),
+# (after the switch to release tarballs, plan step B6).
 # node_modules/@lily-on-eink/core/package.json must stay installed: its version goes into the About page links and
 # into README-SOURCE.txt.
 on:
