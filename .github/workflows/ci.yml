@@ -1,0 +1,52 @@
+name: CI
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+concurrency:
+  # One run per PR/branch: a new push cancels the outdated PR run. Pushes to main are never cancelled.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: lily-on-eink-app
+          persist-credentials: false
+      - name: Read the core ref
+        id: core
+        run: echo "ref=$(tr -d '[:space:]' < lily-on-eink-app/core-ref.txt)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: ranacrocando/lily-on-eink
+          ref: ${{ steps.core.outputs.ref }}
+          path: lily-on-eink
+          token: ${{ secrets.CORE_REPO_TOKEN }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: lily-on-eink-app/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            lily-on-eink/package-lock.json
+            lily-on-eink-app/package-lock.json
+      - name: Build core
+        working-directory: lily-on-eink
+        run: |
+          npm ci
+          npm run build
+      - name: Check the app
+        working-directory: lily-on-eink-app
+        run: |
+          npm ci
+          npm run lint
+          npm run format:check
+          npm run typecheck
+          npm test
+          npm run build
+          node scripts/check-build.mjs

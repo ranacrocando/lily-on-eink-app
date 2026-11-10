@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>lily-on-eink</title>
+  </head>
+  <body>
+    <main id="app">
+      <h1>lily-on-eink</h1>
+      <p>Turn your LilyPond sheet music into PDFs that fit your e-reader. Everything happens in your browser.</p>
+      <section id="engine-status" aria-live="polite">
+        <p id="engine-text">Loading the music engine (30 MB, once)…</p>
+        <progress id="engine-progress"></progress>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
